@@ -59,10 +59,12 @@
             background: #94a3b8; 
         }
         
-        /* Absolute A4 Portrait dimensions at 96 DPI for pixel-perfect PDF export */
+        /* Fixed sizing container for the kuitansi.
+           Optimized to fit beautifully on A5 Portrait export without overlapping or breaking into 2 pages.
+        */
         .receipt-card {
-            width: 794px;
-            height: 1123px;
+            width: 530px;
+            height: 750px;
             background-color: #ffffff;
             box-sizing: border-box;
             flex-shrink: 0;
@@ -94,7 +96,7 @@
                         Kuitansi
                     </button>
                     <button onclick="switchTab('settings')" id="tab-settings" class="h-full px-4 border-b-2 border-transparent text-stone-500 hover:text-stone-800 font-medium transition-colors flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31(2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31-2.37-2.37.996.608 2.296.07 2.572-1.065"></svg>
                         Pengaturan
                     </button>
                 </div>
@@ -173,97 +175,97 @@
 
             <!-- Right Column: Live Preview Area with Responsive Scaling -->
             <div class="lg:col-span-7 bg-stone-300 rounded-3xl p-4 sm:p-6 flex flex-col items-center justify-start overflow-hidden shadow-inner border border-stone-400">
-                <span class="text-xs text-stone-500 font-semibold tracking-wider uppercase mb-3">Pratinjau Kuitansi Cetak (A4)</span>
+                <span class="text-xs text-stone-500 font-semibold tracking-wider uppercase mb-3">Pratinjau Kuitansi Cetak (A5 Portrait)</span>
                 
                 <!-- Scaling Container Wrapper -->
                 <div class="w-full flex justify-center overflow-visible">
                     <div id="preview-scale-wrapper" class="origin-top transition-transform duration-200">
                         
-                        <!-- KUITANSI CANVAS (Perfect A4 794x1123px Element) -->
-                        <div id="receipt-canvas" class="receipt-card p-14 relative shadow-2xl border-4 border-[#2a2a2a] flex flex-col justify-between">
+                        <!-- KUITANSI CANVAS (Perfect A5 Portrait Element) -->
+                        <div id="receipt-canvas" class="receipt-card p-10 relative shadow-2xl border-4 border-[#2a2a2a] flex flex-col justify-between">
                             <!-- Double Decorative Inner Border in Gold -->
-                            <div class="absolute inset-2 border border-gold-500/40 pointer-events-none"></div>
-                            <div class="absolute inset-3.5 border border-gold-500/20 pointer-events-none"></div>
+                            <div class="absolute inset-1.5 border border-gold-500/40 pointer-events-none"></div>
+                            <div class="absolute inset-3 border border-gold-500/20 pointer-events-none"></div>
                             
                             <div class="relative z-10 h-full flex flex-col justify-between">
                                 
                                 <!-- Header / Kop Surat (Dian Pravita Style) -->
-                                <div class="flex justify-between items-start border-b border-gold-500 pb-5">
+                                <div class="flex justify-between items-start border-b border-gold-500 pb-4">
                                     <!-- Left: Brand / Logo MUA -->
                                     <div class="flex-grow pr-3">
-                                        <div id="preview-header-text" class="pt-2">
-                                            <h1 class="font-serif text-3xl font-bold text-darkgrey-900 tracking-widest leading-none">DIAN PRAVITA</h1>
-                                            <p class="text-[10px] font-bold tracking-[0.3em] text-gold-600 mt-2.5 uppercase">Makeup & Kebaya</p>
+                                        <div id="preview-header-text" class="pt-1">
+                                            <h1 class="font-serif text-2xl font-bold text-darkgrey-900 tracking-wider leading-none">DIAN PRAVITA</h1>
+                                            <p class="text-[9px] font-semibold tracking-[0.25em] text-gold-600 mt-2 uppercase">Makeup & Kebaya</p>
                                         </div>
-                                        <img id="preview-header-logo" src="" alt="Logo" class="max-h-16 hidden object-contain">
+                                        <img id="preview-header-logo" src="" alt="Logo" class="max-h-12 hidden object-contain">
                                     </div>
                                     
                                     <!-- Right: Business Address Block -->
-                                    <div class="text-right text-[10px] text-stone-600 leading-relaxed font-sans max-w-[220px] border-l border-gold-500/30 pl-5">
-                                        <p class="font-bold text-darkgrey-900 tracking-widest uppercase text-[9px] mb-1">Studio & Gallery</p>
+                                    <div class="text-right text-[8px] text-stone-600 leading-relaxed font-sans max-w-[190px] border-l border-gold-500/30 pl-4">
+                                        <p class="font-bold text-darkgrey-900 tracking-wide uppercase text-[8px] mb-0.5">Studio & Gallery</p>
                                         <p class="font-semibold text-stone-700">Tamansari Hills Residence</p>
                                         <p>Mangunharjo, Tembalang, Semarang</p>
-                                        <p class="mt-1"><span class="text-gold-600 font-bold">WA:</span> 0813 9296 9266</p>
+                                        <p class="mt-0.5"><span class="text-gold-600 font-bold">WA:</span> 0813 9296 9266</p>
                                         <p><span class="text-gold-600 font-bold">Web:</span> dianpravita.com</p>
                                     </div>
                                 </div>
 
                                 <!-- Title & Receipt Number (NO. KUI under title) -->
-                                <div class="text-center my-8">
-                                    <h2 class="text-3xl font-serif text-darkgrey-900 uppercase tracking-[0.3em] font-bold">Kuitansi</h2>
-                                    <p class="text-xs font-semibold tracking-widest text-gold-600 mt-2">
-                                        NO. <span id="preview-no" class="font-serif text-sm">KUI-015/DP/6/2026</span>
+                                <div class="text-center my-6">
+                                    <h2 class="text-2xl font-serif text-darkgrey-900 uppercase tracking-[0.3em] font-bold">Kuitansi</h2>
+                                    <p class="text-xs font-semibold tracking-widest text-gold-600 mt-1">
+                                        NO. <span id="preview-no" class="font-serif text-[11px]">KUI-015/DP/6/2026</span>
                                     </p>
                                 </div>
 
                                 <!-- Main Contents (Form Rows optimized for Portrait) -->
-                                <div class="space-y-8 flex-grow my-4">
+                                <div class="space-y-6 flex-grow my-3">
                                     <!-- Row 1: Client Name -->
                                     <div class="flex items-start gap-4">
-                                        <span class="w-36 flex-shrink-0 text-stone-500 font-serif text-sm italic pt-1">Telah terima dari</span>
-                                        <span class="text-gold-500 font-bold text-sm pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[2.2rem]">
-                                            <span id="preview-name" class="text-darkgrey-900 font-semibold font-serif text-lg italic"></span>
+                                        <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Telah terima dari</span>
+                                        <span class="text-gold-500 font-bold text-xs pt-1">:</span>
+                                        <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[2rem]">
+                                            <span id="preview-name" class="text-darkgrey-900 font-semibold font-serif text-base italic"></span>
                                         </div>
                                     </div>
 
                                     <!-- Row 2: Words / Terbilang -->
                                     <div class="flex items-start gap-4">
-                                        <span class="w-36 flex-shrink-0 text-stone-500 font-serif text-sm italic pt-1">Uang Sebanyak</span>
-                                        <span class="text-gold-500 font-bold text-sm pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-1.5 min-h-[3.8rem] bg-stone-50/50 px-3 rounded-sm border-dashed border-stone-300">
-                                            <span id="preview-words" class="text-stone-700 font-serif text-sm italic leading-relaxed capitalize"></span>
+                                        <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Uang Sebanyak</span>
+                                        <span class="text-gold-500 font-bold text-xs pt-1">:</span>
+                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[3.2rem] bg-stone-50/50 px-2 rounded-sm border-dashed border-stone-300">
+                                            <span id="preview-words" class="text-stone-700 font-serif text-xs italic leading-relaxed capitalize"></span>
                                         </div>
                                     </div>
 
                                     <!-- Row 3: For Payment -->
                                     <div class="flex items-start gap-4">
-                                        <span class="w-36 flex-shrink-0 text-stone-500 font-serif text-sm italic pt-1">Untuk Pembayaran</span>
-                                        <span class="text-gold-500 font-bold text-sm pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[4.2rem]">
-                                            <span id="preview-for" class="text-darkgrey-900 text-sm leading-relaxed"></span>
+                                        <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Untuk Pembayaran</span>
+                                        <span class="text-gold-500 font-bold text-xs pt-1">:</span>
+                                        <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[3.5rem]">
+                                            <span id="preview-for" class="text-darkgrey-900 text-xs leading-relaxed"></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Footer Layout (Signatures & Amount Box) -->
-                                <div class="flex justify-between items-end mt-6 pt-5 border-t border-stone-100">
+                                <div class="flex justify-between items-end mt-5 pt-4 border-t border-stone-100">
                                     <!-- Nominal Box -->
-                                    <div class="bg-darkgrey-900 text-white p-4 px-6 rounded-sm shadow-md inline-block min-w-[250px] border-b-4 border-gold-500">
-                                        <p class="text-[9px] font-bold tracking-[0.25em] text-gold-500 uppercase mb-1">Jumlah Nominal</p>
-                                        <p class="text-2xl font-bold tracking-wider font-sans text-white">Rp <span id="preview-amount" class="text-gold-100">0</span></p>
+                                    <div class="bg-darkgrey-900 text-white p-3 px-5 rounded-sm shadow-md inline-block min-w-[210px] border-b-4 border-gold-500">
+                                        <p class="text-[8px] font-bold tracking-[0.25em] text-gold-500 uppercase mb-1">Jumlah Nominal</p>
+                                        <p class="text-xl font-bold tracking-wider font-sans text-white">Rp <span id="preview-amount" class="text-gold-100">0</span></p>
                                     </div>
 
-                                    <!-- Sign & Date Area (Clean with removed sub-text) -->
-                                    <div class="text-center w-52 relative">
-                                        <p id="preview-date" class="text-stone-500 font-medium text-[11px] mb-3">Semarang, 03 Juni 2026</p>
+                                    <!-- Sign & Date Area -->
+                                    <div class="text-center w-48 relative">
+                                        <p id="preview-date" class="text-stone-500 font-medium text-[10px] mb-2.5"></p>
                                         
-                                        <div class="h-16 flex items-center justify-center relative mb-1">
+                                        <div class="h-14 flex items-center justify-center relative mb-1">
                                             <!-- Embedded Signature Uploaded -->
                                             <img id="preview-signature" src="" alt="Tanda Tangan" class="max-h-full max-w-full hidden absolute z-10 opacity-90 transition-all">
                                         </div>
                                         
-                                        <p class="text-darkgrey-900 font-serif font-bold text-base border-b border-stone-400 inline-block px-4 pb-0.5 relative z-20">Dian Pravita</p>
+                                        <p class="text-darkgrey-900 font-serif font-bold text-sm border-b border-stone-400 inline-block px-4 pb-0.5 relative z-20">Dian Pravita</p>
                                     </div>
                                 </div>
 
@@ -386,7 +388,6 @@
             if (el) el.textContent = text;
         }
 
-        // Sets values safely
         function setElementValue(id, val) {
             const el = document.getElementById(id);
             if (el) el.value = val;
@@ -418,10 +419,10 @@
             const wrapper = document.getElementById('preview-scale-wrapper');
             if (!wrapper) return;
             const parentWidth = wrapper.parentElement.clientWidth;
-            // Scale based on design target (794px width)
-            const scale = Math.min(1, parentWidth / 794);
+            // Target width is adjusted to 530px A5 Portrait
+            const scale = Math.min(1, parentWidth / 530);
             wrapper.style.transform = `scale(${scale})`;
-            wrapper.parentElement.style.height = `${1123 * scale}px`;
+            wrapper.parentElement.style.height = `${750 * scale}px`;
         }
 
         // Initialize UI values on startup
@@ -585,7 +586,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // Fixed from files to files for Safari support
+            const file = files;
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -666,19 +667,17 @@
 
             showToast("Menyiapkan PDF...");
 
-            // Elegant, safe PDF settings incorporating your recommended library options
+            // Elegant, safe PDF settings incorporating your recommended A5 Portrait library options
             const opt = {
-                margin:       0, // Safe A4 alignment to prevent page-cutting
+                margin:       0, // Zero margin to prevent breaking into page 2
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true, 
-                    logging: false,
-                    width: 794,
-                    height: 1123
+                    logging: false
                 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
