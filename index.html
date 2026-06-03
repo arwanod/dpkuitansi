@@ -427,6 +427,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK:Implementing dynamic scale resizing observer... ---
         // --- DYNAMIC PREVIEW RESIZING ---
         function resizePreview() {
             const wrapper = document.getElementById('preview-scale-wrapper');
@@ -492,6 +493,7 @@
             }
         }
 
+        // --- STREAMING_CHUNK:Coding receipt state updates and Terbilang translator... ---
         // --- DATE CHANGE LOGIC ---
         let formattedDateString = "";
         let monthNum = 6;
@@ -589,6 +591,7 @@
             setElementText('form-terbilang', words ? `Terbilang: ${words}` : '');
         }
 
+        // --- STREAMING_CHUNK:Developing logo rendering and toggling triggers... ---
         // --- SETTINGS LOGIC ---
         function handleImageUpload(event, type) {
             const files = event.target.files;
@@ -615,7 +618,6 @@
             reader.readAsDataURL(file);
         }
 
-        // --- STREAMING_CHUNK:Clearing media resources and synchronization configs... ---
         function removeImage(type) {
             if(type === 'logo') {
                 appState.logoBase64 = '';
@@ -666,131 +668,63 @@
             showToast("Pengaturan disimpan!", "success");
         }
 
-        // --- STREAMING_CHUNK:Implementing isolated Iframe sandbox and fonts.ready APIs... ---
-        // --- EXPORTS & ACTIONS (Perfect iOS Safari Iframe Rendering Solution) ---
-        function downloadPDF() {
-            const element = document.getElementById('receipt-canvas');
-            if (!element) return;
-            
+        // Helper function to build receipt number string
+        function buildNomor() {
             const inputNo = document.getElementById('input-no');
-            const inputName = document.getElementById('input-name');
-            const noUrut = inputNo ? inputNo.value : '000';
-            const clientName = inputName ? inputName.value : 'Klien';
-            
-            const formattedNomor = `KUI-${noUrut.padStart(3, '0')}_DP_${monthNum}_${yearNum}`;
-            const filename = `Kuitansi_${formattedNomor}_${clientName.replace(/\s+/g, '_')}.pdf`;
-
-            showToast("Menyiapkan PDF...");
-
-            // 1. Create a hidden, strictly isolated iframe
-            const iframe = document.createElement('iframe');
-            iframe.style.position = 'fixed';
-            iframe.style.left = '-9999px';
-            iframe.style.top = '-9999px';
-            iframe.style.width = '520px';
-            iframe.style.height = '735px';
-            iframe.style.border = 'none';
-            document.body.appendChild(iframe);
-
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-            // 2. Clone the target element and strip off-site relative constraints
-            const clonedReceipt = element.cloneNode(true);
-            clonedReceipt.className = "p-10 relative border-4 border-[#2a2a2a] flex flex-col justify-between bg-white";
-            clonedReceipt.style.boxShadow = 'none';
-            clonedReceipt.style.transform = 'none';
-            clonedReceipt.style.margin = '0';
-            clonedReceipt.style.width = '520px';
-            clonedReceipt.style.height = '735px';
-            clonedReceipt.style.position = 'relative';
-            clonedReceipt.style.boxSizing = 'border-box';
-
-            // 3. Re-inject Document Head (Google fonts & Tailwind Script compiler) for correct asset metrics inside iframe
-            const headElements = document.head.innerHTML;
-            
-            iframeDoc.open();
-            iframeDoc.write(`
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    ${headElements}
-                    <style>
-                        body {
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            width: 520px !important;
-                            height: 735px !important;
-                            background: #ffffff !important;
-                            overflow: hidden !important;
-                            -webkit-text-size-adjust: none !important;
-                            text-size-adjust: none !important;
-                        }
-                        .receipt-card {
-                            width: 520px !important;
-                            height: 735px !important;
-                            box-shadow: none !important;
-                            border-width: 4px !important;
-                            border-color: #2a2a2a !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div id="print-sandbox-target"></div>
-                </body>
-                </html>
-            `);
-            iframeDoc.close();
-
-            // Inject the clone node inside target wrapper in iframe body
-            const target = iframeDoc.getElementById('print-sandbox-target');
-            target.appendChild(clonedReceipt);
-
-            // 4. Set up point parameters mapped to pixel density (0.75 ratio)
-            const opt = {
-                margin:       0, 
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 1.0 },
-                html2canvas:  { 
-                    scale: 3, // Premium high-density capture
-                    useCORS: true, 
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    width: 520,
-                    height: 735,
-                    windowWidth: 520,
-                    windowHeight: 735
-                },
-                jsPDF:        { unit: 'pt', format: [390, 551.25], orientation: 'portrait' }
-            };
-
-            // 5. SECURE SAFEPOINT: Wait for Google fonts and image assets to be fully ready in iframe window
-            const performRender = () => {
-                html2pdf().set(opt).from(clonedReceipt).save().then(() => {
-                    // Cleanup
-                    if (iframe.parentNode) {
-                        document.body.removeChild(iframe);
-                    }
-                    showToast("✓ PDF berhasil diunduh!", "success");
-                }).catch((err) => {
-                    console.error("PDF generation error: ", err);
-                    if (iframe.parentNode) {
-                        document.body.removeChild(iframe);
-                    }
-                    showToast("Gagal mengunduh PDF.", "error");
-                });
-            };
-
-            // Using ready promise with a fallback timeout for ultimate stability in old iOS webkits
-            if (iframe.contentWindow.document.fonts && iframe.contentWindow.document.fonts.ready) {
-                iframe.contentWindow.document.fonts.ready.then(() => {
-                    setTimeout(performRender, 150);
-                });
-            } else {
-                setTimeout(performRender, 350);
-            }
+            const noUrut = inputNo ? inputNo.value : '015';
+            return `KUI-${noUrut.padStart(3, '0')}/DP/${monthNum}/${yearNum}`;
         }
 
+        // --- STREAMING_CHUNK:Integrating your high-performance PDF download logic... ---
+        // --- EXPORTS & ACTIONS (Optimized with Temporary Scale-Reset for iOS Safari) ---
+        function downloadPDF() {
+            const el = document.getElementById('receipt-canvas');
+            if (!el) return;
+
+            const wrapper = document.getElementById('preview-scale-wrapper');
+            let originalTransform = '';
+            let originalParentHeight = '';
+
+            // 1. TEMPORARILY RESET SCALE TRANSFORM:
+            // Mobile Webkit Safari has a bug where it captures elements with active 'transform: scale' 
+            // as cropped or skewed. Resetting it temporarily guarantees 1x pixel-perfect capture.
+            if (wrapper) {
+                originalTransform = wrapper.style.transform;
+                originalParentHeight = wrapper.parentElement.style.height;
+                wrapper.style.transform = 'none';
+                wrapper.parentElement.style.height = 'auto';
+            }
+
+            // Build dynamic filename from user's custom script
+            const nomor = buildNomor().replace(/\//g, '-').replace(/\s/g, '_');
+            showToast('Menyiapkan PDF...');
+
+            // 2. RUN THE PROVEN CLEAN PDF SCRIPT:
+            html2pdf().set({
+                margin: 0,
+                filename: `Kuitansi_${nomor}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+            }).from(el).save().then(() => {
+                // 3. RESTORE THE VIEWPORT SCALE ON SUCCESS:
+                if (wrapper) {
+                    wrapper.style.transform = originalTransform;
+                    wrapper.parentElement.style.height = originalParentHeight;
+                }
+                showToast('✓ PDF berhasil diunduh!', 'success');
+            }).catch((err) => {
+                console.error("PDF generation failed: ", err);
+                // Restore scale even on fail
+                if (wrapper) {
+                    wrapper.style.transform = originalTransform;
+                    wrapper.parentElement.style.height = originalParentHeight;
+                }
+                showToast('Gagal mengunduh PDF.', 'error');
+            });
+        }
+
+        // --- STREAMING_CHUNK:Configuring WhatsApp and Google Sheets export endpoints... ---
         function shareWhatsApp() {
             const inputName = document.getElementById('input-name');
             const inputFor = document.getElementById('input-for');
