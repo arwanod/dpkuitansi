@@ -59,16 +59,31 @@
             background: #94a3b8; 
         }
         
-        /* Fixed sizing container for the kuitansi.
-           Optimized to fit beautifully on A5 Portrait export without overlapping or breaking into 2 pages.
+        /* Fixed sizing container for the kuitansi preview on screen.
+           Optimized to keep A5 ratio (approx 1:1.414).
         */
         .receipt-card {
             width: 520px;
-            height: 740px;
+            height: 735px;
             background-color: #ffffff;
             box-sizing: border-box;
             flex-shrink: 0;
             margin: 0 !important;
+        }
+
+        /* This style is used strictly during PDF compilation 
+           to enforce perfect physical A5 Dimensions (148mm x 210mm)
+        */
+        .pdf-print-target {
+            width: 148mm !important;
+            height: 210mm !important;
+            padding: 10mm !important;
+            box-sizing: border-box !important;
+            background-color: #ffffff !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            position: relative !important;
         }
     </style>
 </head>
@@ -429,7 +444,6 @@
             const wrapper = document.getElementById('preview-scale-wrapper');
             if (!wrapper) return;
             const parentWidth = wrapper.parentElement.clientWidth;
-            // Target width is adjusted to 520px A5 Portrait safely
             const scale = Math.min(1, parentWidth / 520);
             wrapper.style.transform = `scale(${scale})`;
             wrapper.parentElement.style.height = `${740 * scale}px`;
@@ -664,7 +678,7 @@
             showToast("Pengaturan visual disimpan!", "success");
         }
 
-        // --- EXPORTS & ACTIONS (With Sandbox Renderer iOS Safari Fix) ---
+        // --- EXPORTS & ACTIONS (With Perfect mm Sandboxed A5 Layout) ---
         function downloadPDF() {
             const element = document.getElementById('receipt-canvas');
             if (!element) return;
@@ -679,62 +693,46 @@
 
             showToast("Menyiapkan PDF...");
 
-            // --- SAFARI & CHROME IOS PERFECT RENDERING SANDBOX ---
-            // Move the kuitansi container temporarily to body to escape parent overflow-hidden, 
-            // scroll position offsets, and responsive CSS scale transforms.
-            const parent = element.parentElement;
-            const nextSibling = element.nextSibling;
+            // --- SAFARI & CHROME IOS FIXED PDF SANDBOX ---
+            // Create a temporary sandboxed node to render precisely on mm values (Avoiding CSS translation bugs)
+            const sandbox = document.createElement('div');
+            sandbox.style.position = 'fixed';
+            sandbox.style.left = '-9999px';
+            sandbox.style.top = '0';
+            sandbox.style.width = '148mm';
+            sandbox.style.height = '210mm';
+            sandbox.style.zIndex = '-9999';
+            document.body.appendChild(sandbox);
 
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'fixed';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.top = '0';
-            tempContainer.style.width = '520px';
-            tempContainer.style.height = '740px';
-            tempContainer.style.background = '#ffffff';
-            tempContainer.style.zIndex = '-9999';
-            document.body.appendChild(tempContainer);
+            // Clone our kuitansi element
+            const clonedReceipt = element.cloneNode(true);
+            
+            // Apply strict physical sizing values and strip outer drop shadows
+            clonedReceipt.className = "pdf-print-target";
+            sandbox.appendChild(clonedReceipt);
 
-            // Temporarily strip out outer elements like drop shadow which adds invisible margins causing a 2nd blank page
-            element.classList.remove('shadow-2xl');
-            tempContainer.appendChild(element);
-
-            // Print configuration targeting crisp A5 Portrait layout
+            // Print configuration targeting crisp A5 Portrait layout with zero margin gaps
             const opt = {
                 margin:       0, 
                 filename:     filename,
-                image:        { type: 'jpeg', quality: 1.0 },
+                image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
-                    scale: 2.5, // Crisp high resolution scale
+                    scale: 3.0, // High density crispness
                     useCORS: true, 
                     logging: false,
-                    width: 520,  // Exact matching dimension with receipt-card style
-                    height: 740,
+                    width: 559.37,  // Precise pixel translation mapping for 148mm at 96 DPI
+                    height: 793.70, // Precise pixel translation mapping for 210mm at 96 DPI
                     scrollX: 0,
                     scrollY: 0
                 },
                 jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Restore element back to its original layout placement
-                element.classList.add('shadow-2xl');
-                if (nextSibling) {
-                    parent.insertBefore(element, nextSibling);
-                } else {
-                    parent.appendChild(element);
-                }
-                document.body.removeChild(tempContainer);
+            html2pdf().set(opt).from(clonedReceipt).save().then(() => {
+                document.body.removeChild(sandbox);
                 showToast("✓ PDF berhasil diunduh!", "success");
             }).catch((err) => {
-                // Graceful rollback restore in case of failure
-                element.classList.add('shadow-2xl');
-                if (nextSibling) {
-                    parent.insertBefore(element, nextSibling);
-                } else {
-                    parent.appendChild(element);
-                }
-                document.body.removeChild(tempContainer);
+                document.body.removeChild(sandbox);
                 showToast("Gagal mengunduh PDF.", "error");
             });
         }
