@@ -59,12 +59,13 @@
             background: #94a3b8; 
         }
         
-        /* Fixed, crispy sizing for the portrait receipt to prevent layout shifting on Safari and during PDF conversion */
+        /* Absolute A4 Portrait dimensions at 96 DPI for pixel-perfect PDF export */
         .receipt-card {
-            width: 580px;
-            height: 773px; /* Exact 3:4 portrait aspect ratio (approx) */
+            width: 794px;
+            height: 1123px;
             background-color: #ffffff;
             box-sizing: border-box;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -170,100 +171,108 @@
                 </div>
             </div>
 
-            <!-- Right Column: Live Preview (Crisp 3:4 Portrait Preview Container) -->
-            <div class="lg:col-span-7 bg-stone-300 rounded-3xl p-4 sm:p-6 flex items-start justify-center overflow-x-auto custom-scroll shadow-inner border border-stone-400">
+            <!-- Right Column: Live Preview Area with Responsive Scaling -->
+            <div class="lg:col-span-7 bg-stone-300 rounded-3xl p-4 sm:p-6 flex flex-col items-center justify-start overflow-hidden shadow-inner border border-stone-400">
+                <span class="text-xs text-stone-500 font-semibold tracking-wider uppercase mb-3">Pratinjau Kuitansi Cetak (A4)</span>
                 
-                <!-- KUITANSI CANVAS (Elegant Classic Frame with Fixed Dimension) -->
-                <div id="receipt-canvas" class="receipt-card p-10 relative shadow-2xl border-4 border-[#2a2a2a] flex flex-col justify-between">
-                    <!-- Double Decorative Inner Border in Gold -->
-                    <div class="absolute inset-1.5 border border-gold-500/40 pointer-events-none"></div>
-                    <div class="absolute inset-2.5 border border-gold-500/20 pointer-events-none"></div>
-                    
-                    <div class="relative z-10 h-full flex flex-col justify-between">
+                <!-- Scaling Container Wrapper -->
+                <div class="w-full flex justify-center overflow-visible">
+                    <div id="preview-scale-wrapper" class="origin-top transition-transform duration-200">
                         
-                        <!-- Header / Kop Surat (Dian Pravita Style) -->
-                        <div class="flex justify-between items-start border-b border-gold-500 pb-4">
-                            <!-- Left: Brand / Logo MUA -->
-                            <div class="flex-grow pr-3">
-                                <div id="preview-header-text">
-                                    <h1 class="font-serif text-2xl font-bold text-darkgrey-900 tracking-wider">DIAN PRAVITA</h1>
-                                    <p class="text-[9px] font-semibold tracking-[0.25em] text-gold-600 mt-0.5 uppercase">Makeup & Kebaya</p>
-                                </div>
-                                <img id="preview-header-logo" src="" alt="Logo" class="max-h-12 hidden object-contain">
-                            </div>
+                        <!-- KUITANSI CANVAS (Perfect A4 794x1123px Element) -->
+                        <div id="receipt-canvas" class="receipt-card p-14 relative shadow-2xl border-4 border-[#2a2a2a] flex flex-col justify-between">
+                            <!-- Double Decorative Inner Border in Gold -->
+                            <div class="absolute inset-2 border border-gold-500/40 pointer-events-none"></div>
+                            <div class="absolute inset-3.5 border border-gold-500/20 pointer-events-none"></div>
                             
-                            <!-- Right: Business Address Block -->
-                            <div class="text-right text-[8px] text-stone-600 leading-relaxed font-sans max-w-[180px] border-l border-gold-500/30 pl-3">
-                                <p class="font-bold text-darkgrey-900 tracking-wide uppercase text-[7.5px] mb-0.5">Studio & Gallery</p>
-                                <p class="font-medium text-stone-700">Tamansari Hills Residence</p>
-                                <p>Mangunharjo, Tembalang, Semarang</p>
-                                <p class="mt-0.5"><span class="text-gold-600 font-semibold">WA:</span> 0813 9296 9266</p>
-                                <p><span class="text-gold-600 font-semibold">Web:</span> dianpravita.com</p>
-                            </div>
-                        </div>
-
-                        <!-- Title & Receipt Number (NO. KUI under title) -->
-                        <div class="text-center my-3.5">
-                            <h2 class="text-xl font-serif text-darkgrey-900 uppercase tracking-[0.3em] font-bold">Kuitansi</h2>
-                            <p class="text-[11px] font-semibold tracking-widest text-gold-600 mt-0.5">
-                                NO. <span id="preview-no" class="font-serif">KUI-015/DP/6/2026</span>
-                            </p>
-                        </div>
-
-                        <!-- Main Contents (Form Rows optimized for Portrait) -->
-                        <div class="space-y-4 flex-grow my-2">
-                            <!-- Row 1: Client Name -->
-                            <div class="flex items-start gap-3">
-                                <span class="w-28 flex-shrink-0 text-stone-500 font-serif text-[11px] italic pt-1">Telah terima dari</span>
-                                <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[1.5rem]">
-                                    <span id="preview-name" class="text-darkgrey-900 font-semibold font-serif text-sm italic"></span>
-                                </div>
-                            </div>
-
-                            <!-- Row 2: Words / Terbilang -->
-                            <div class="flex items-start gap-3">
-                                <span class="w-28 flex-shrink-0 text-stone-500 font-serif text-[11px] italic pt-1">Uang Sebanyak</span>
-                                <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                <div class="flex-grow border-b border-stone-200 pb-1 min-h-[2.5rem] bg-stone-50/50 px-2 rounded-sm border-dashed border-stone-300">
-                                    <span id="preview-words" class="text-stone-700 font-serif text-[11px] italic leading-relaxed capitalize"></span>
-                                </div>
-                            </div>
-
-                            <!-- Row 3: For Payment -->
-                            <div class="flex items-start gap-3">
-                                <span class="w-28 flex-shrink-0 text-stone-500 font-serif text-[11px] italic pt-1">Untuk Pembayaran</span>
-                                <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[3rem]">
-                                    <span id="preview-for" class="text-darkgrey-900 text-xs leading-relaxed"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Footer Layout (Signatures & Amount Box) -->
-                        <div class="flex justify-between items-end mt-4 pt-3 border-t border-stone-100">
-                            <!-- Nominal Box -->
-                            <div class="bg-darkgrey-900 text-white p-2.5 px-4 rounded-sm shadow-md inline-block min-w-[180px] border-b-2 border-gold-500">
-                                <p class="text-[7.5px] font-bold tracking-[0.2em] text-gold-500 uppercase mb-0.5">Jumlah Nominal</p>
-                                <p class="text-lg font-bold tracking-wider font-sans text-white">Rp <span id="preview-amount" class="text-gold-100">0</span></p>
-                            </div>
-
-                            <!-- Sign & Date Area (Clean with removed sub-text) -->
-                            <div class="text-center w-40 relative">
-                                <p id="preview-date" class="text-stone-500 font-medium text-[9px] mb-2">Semarang, 03 Juni 2026</p>
+                            <div class="relative z-10 h-full flex flex-col justify-between">
                                 
-                                <div class="h-12 flex items-center justify-center relative mb-1">
-                                    <!-- Embedded Signature Uploaded -->
-                                    <img id="preview-signature" src="" alt="Tanda Tangan" class="max-h-full max-w-full hidden absolute z-10 opacity-90 transition-all">
+                                <!-- Header / Kop Surat (Dian Pravita Style) -->
+                                <div class="flex justify-between items-start border-b border-gold-500 pb-5">
+                                    <!-- Left: Brand / Logo MUA -->
+                                    <div class="flex-grow pr-3">
+                                        <div id="preview-header-text" class="pt-2">
+                                            <h1 class="font-serif text-3xl font-bold text-darkgrey-900 tracking-widest leading-none">DIAN PRAVITA</h1>
+                                            <p class="text-[10px] font-bold tracking-[0.3em] text-gold-600 mt-2.5 uppercase">Makeup & Kebaya</p>
+                                        </div>
+                                        <img id="preview-header-logo" src="" alt="Logo" class="max-h-16 hidden object-contain">
+                                    </div>
+                                    
+                                    <!-- Right: Business Address Block -->
+                                    <div class="text-right text-[10px] text-stone-600 leading-relaxed font-sans max-w-[220px] border-l border-gold-500/30 pl-5">
+                                        <p class="font-bold text-darkgrey-900 tracking-widest uppercase text-[9px] mb-1">Studio & Gallery</p>
+                                        <p class="font-semibold text-stone-700">Tamansari Hills Residence</p>
+                                        <p>Mangunharjo, Tembalang, Semarang</p>
+                                        <p class="mt-1"><span class="text-gold-600 font-bold">WA:</span> 0813 9296 9266</p>
+                                        <p><span class="text-gold-600 font-bold">Web:</span> dianpravita.com</p>
+                                    </div>
                                 </div>
-                                
-                                <p class="text-darkgrey-900 font-serif font-bold text-sm border-b border-stone-400 inline-block px-2 pb-0.5 relative z-20">Dian Pravita</p>
+
+                                <!-- Title & Receipt Number (NO. KUI under title) -->
+                                <div class="text-center my-8">
+                                    <h2 class="text-3xl font-serif text-darkgrey-900 uppercase tracking-[0.3em] font-bold">Kuitansi</h2>
+                                    <p class="text-xs font-semibold tracking-widest text-gold-600 mt-2">
+                                        NO. <span id="preview-no" class="font-serif text-sm">KUI-015/DP/6/2026</span>
+                                    </p>
+                                </div>
+
+                                <!-- Main Contents (Form Rows optimized for Portrait) -->
+                                <div class="space-y-8 flex-grow my-4">
+                                    <!-- Row 1: Client Name -->
+                                    <div class="flex items-start gap-4">
+                                        <span class="w-36 flex-shrink-0 text-stone-500 font-serif text-sm italic pt-1">Telah terima dari</span>
+                                        <span class="text-gold-500 font-bold text-sm pt-1">:</span>
+                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[2.2rem]">
+                                            <span id="preview-name" class="text-darkgrey-900 font-semibold font-serif text-lg italic"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Words / Terbilang -->
+                                    <div class="flex items-start gap-4">
+                                        <span class="w-36 flex-shrink-0 text-stone-500 font-serif text-sm italic pt-1">Uang Sebanyak</span>
+                                        <span class="text-gold-500 font-bold text-sm pt-1">:</span>
+                                        <div class="flex-grow border-b border-stone-200 pb-1.5 min-h-[3.8rem] bg-stone-50/50 px-3 rounded-sm border-dashed border-stone-300">
+                                            <span id="preview-words" class="text-stone-700 font-serif text-sm italic leading-relaxed capitalize"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 3: For Payment -->
+                                    <div class="flex items-start gap-4">
+                                        <span class="w-36 flex-shrink-0 text-stone-500 font-serif text-sm italic pt-1">Untuk Pembayaran</span>
+                                        <span class="text-gold-500 font-bold text-sm pt-1">:</span>
+                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[4.2rem]">
+                                            <span id="preview-for" class="text-darkgrey-900 text-sm leading-relaxed"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer Layout (Signatures & Amount Box) -->
+                                <div class="flex justify-between items-end mt-6 pt-5 border-t border-stone-100">
+                                    <!-- Nominal Box -->
+                                    <div class="bg-darkgrey-900 text-white p-4 px-6 rounded-sm shadow-md inline-block min-w-[250px] border-b-4 border-gold-500">
+                                        <p class="text-[9px] font-bold tracking-[0.25em] text-gold-500 uppercase mb-1">Jumlah Nominal</p>
+                                        <p class="text-2xl font-bold tracking-wider font-sans text-white">Rp <span id="preview-amount" class="text-gold-100">0</span></p>
+                                    </div>
+
+                                    <!-- Sign & Date Area (Clean with removed sub-text) -->
+                                    <div class="text-center w-52 relative">
+                                        <p id="preview-date" class="text-stone-500 font-medium text-[11px] mb-3">Semarang, 03 Juni 2026</p>
+                                        
+                                        <div class="h-16 flex items-center justify-center relative mb-1">
+                                            <!-- Embedded Signature Uploaded -->
+                                            <img id="preview-signature" src="" alt="Tanda Tangan" class="max-h-full max-w-full hidden absolute z-10 opacity-90 transition-all">
+                                        </div>
+                                        
+                                        <p class="text-darkgrey-900 font-serif font-bold text-base border-b border-stone-400 inline-block px-4 pb-0.5 relative z-20">Dian Pravita</p>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-
+                        
                     </div>
                 </div>
-                <!-- End of Kuitansi Canvas -->
+                <!-- End of Scaling Wrapper -->
             </div>
         </div>
 
@@ -360,7 +369,6 @@
 
     <script>
         // --- INITIAL STATE ---
-        // Setup default date to today or 2026-06-03
         const defaultDate = "2026-06-03";
         let receiptDate = new Date(defaultDate);
 
@@ -404,11 +412,20 @@
             }
         }
 
+        // --- DYNAMIC PREVIEW RESIZING ---
+        function resizePreview() {
+            const wrapper = document.getElementById('preview-scale-wrapper');
+            if (!wrapper) return;
+            const parentWidth = wrapper.parentElement.clientWidth;
+            // Scale based on design target (794px width)
+            const scale = Math.min(1, parentWidth / 794);
+            wrapper.style.transform = `scale(${scale})`;
+            wrapper.parentElement.style.height = `${1123 * scale}px`;
+        }
+
         // Initialize UI values on startup
         function initSettings() {
-            // Set date input to 2026-06-03 safely
             setElementValue('input-date', defaultDate);
-            
             setElementValue('setting-sheet-url', appState.sheetUrl);
             setElementChecked('setting-use-logo', appState.useLogo);
             
@@ -426,6 +443,10 @@
             
             applyLogoSetting();
             handleDateChange(); // Will trigger date formatting and update preview
+            
+            // Register scaling resize observers
+            window.addEventListener('resize', resizePreview);
+            setTimeout(resizePreview, 100);
         }
 
         // --- TAB NAVIGATION ---
@@ -449,6 +470,11 @@
             if (activeTab) {
                 activeTab.classList.add('border-gold-500', 'text-darkgrey-900');
                 activeTab.classList.remove('border-transparent', 'text-stone-500');
+            }
+            
+            // Re-render responsive scales if returning to form
+            if (tabId === 'form') {
+                setTimeout(resizePreview, 50);
             }
         }
 
@@ -558,7 +584,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // Fix for FileList upload in Safari
+            const file = files;
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -634,13 +660,21 @@
             const clientName = inputName ? inputName.value : 'Klien';
             const filename = `Kuitansi_${noUrut}_${clientName.replace(/\s+/g, '_')}.pdf`;
 
-            // Setup options specifically for 3:4 portrait layout capturing
+            // Export settings perfectly adjusted to the 794x1123 A4 canvas
             const opt = {
-                margin:       [0.1, 0.1, 0.1, 0.1],
+                margin:       0, // Zero margins to avoid any blank page breaks or cutoffs
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 1.0 },
-                html2canvas:  { scale: 3, useCORS: true, logging: false },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    width: 794,
+                    height: 1123,
+                    windowWidth: 794,
+                    windowHeight: 1123
+                },
+                jsPDF:        { unit: 'px', format:, orientation: 'portrait' }
             };
 
             showToast("Memproses PDF Kuitansi...", "info");
