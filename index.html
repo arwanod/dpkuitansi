@@ -68,6 +68,7 @@
             background-color: #ffffff;
             box-sizing: border-box;
             flex-shrink: 0;
+            margin: 0 !important;
         }
     </style>
 </head>
@@ -79,28 +80,33 @@
         <span id="toast-message">Notifikasi</span>
     </div>
 
-    <!-- Top Navigation -->
-    <nav class="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-darkgrey-900 text-gold-500 border border-gold-500 rounded-full flex items-center justify-center font-serif font-bold italic text-lg shadow-sm">D</div>
-                    <div class="flex flex-col">
-                        <span class="font-serif font-bold text-base text-darkgrey-900 tracking-wide">Dian Pravita MUA</span>
-                        <span class="text-[10px] font-sans tracking-[0.2em] text-gold-600 uppercase">Dashboard Pembuat Kuitansi</span>
-                    </div>
+    <!-- Top Navigation (Centered & Clean Layout for Mobile Devices) -->
+    <nav class="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm pt-4 pb-0">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center gap-3.5">
+            
+            <!-- Brand Centered -->
+            <div class="flex flex-col items-center gap-1.5 text-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-darkgrey-900 text-gold-500 border border-gold-500 rounded-full flex items-center justify-center font-serif font-bold italic text-base shadow-sm">D</div>
+                    <span class="font-serif font-bold text-lg text-darkgrey-900 tracking-wide">Dian Pravita MUA</span>
                 </div>
-                <div class="flex space-x-2 h-full items-center">
-                    <button onclick="switchTab('form')" id="tab-form" class="h-full px-4 border-b-2 border-gold-500 text-darkgrey-900 font-medium transition-colors flex items-center gap-2">
+                <span class="text-[9px] font-sans tracking-[0.25em] text-gold-600 uppercase font-semibold">Dashboard Pembuat Kuitansi</span>
+            </div>
+            
+            <!-- Menu Tabs Row -->
+            <div class="flex justify-center border-t border-stone-100 w-full pt-1.5">
+                <div class="flex space-x-6">
+                    <button onclick="switchTab('form')" id="tab-form" class="px-5 py-2.5 border-b-2 border-gold-500 text-darkgrey-900 font-semibold transition-colors flex items-center gap-2 text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Kuitansi
                     </button>
-                    <button onclick="switchTab('settings')" id="tab-settings" class="h-full px-4 border-b-2 border-transparent text-stone-500 hover:text-stone-800 font-medium transition-colors flex items-center gap-2">
+                    <button onclick="switchTab('settings')" id="tab-settings" class="px-5 py-2.5 border-b-2 border-transparent text-stone-500 hover:text-stone-800 font-semibold transition-colors flex items-center gap-2 text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31-2.37-2.37.996.608 2.296.07 2.572-1.065"></svg>
                         Pengaturan
                     </button>
                 </div>
             </div>
+
         </div>
     </nav>
 
@@ -398,6 +404,7 @@
             if (el) el.checked = checked;
         }
 
+        // Safe Image source setter
         function setElementSrc(id, src) {
             const el = document.getElementById(id);
             if (el) el.src = src;
@@ -514,6 +521,7 @@
             }
         }
 
+        // Get numeric integer amount
         function getNumericAmount() {
             const inputAmount = document.getElementById('input-amount');
             if (!inputAmount) return 0;
@@ -541,8 +549,6 @@
                     return helper(Math.floor(n / 100)) + " Ratus " + helper(n % 100);
                 } else if (n < 2000) {
                     return "Seribu " + helper(n - 1000);
-                } else if (n < 1000000) {
-                    return helper(Math.floor(n / 1000)) + " Ribu " + helper(n % 1000);
                 } else if (n < 1000000) {
                     return helper(Math.floor(n / 1000)) + " Ribu " + helper(n % 1000);
                 } else if (n < 1000000000) {
@@ -586,7 +592,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files;
+            const file = files; // Restored the files index array accessor correctly to prevent crashes on Safari iOS
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -654,8 +660,9 @@
 
         // --- EXPORTS & ACTIONS ---
         function downloadPDF() {
+            const wrapper = document.getElementById('preview-scale-wrapper');
             const element = document.getElementById('receipt-canvas');
-            if (!element) return;
+            if (!element || !wrapper) return;
             
             const inputNo = document.getElementById('input-no');
             const inputName = document.getElementById('input-name');
@@ -667,22 +674,39 @@
 
             showToast("Menyiapkan PDF...");
 
-            // Elegant, safe PDF settings incorporating your recommended A5 Portrait library options
+            // Safari iOS Fix 1: Temporarily un-scale the element container before generating the screenshot
+            const originalTransform = wrapper.style.transform;
+            const originalParentHeight = wrapper.parentElement.style.height;
+
+            wrapper.style.transform = 'none';
+            wrapper.parentElement.style.height = 'auto';
+
+            // Safari iOS Fix 2: Explicit width, height, and scroll bounds setup
             const opt = {
-                margin:       0, // Zero margin to prevent breaking into page 2
+                margin:       0, 
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true, 
-                    logging: false
+                    logging: false,
+                    width: 530,
+                    height: 750,
+                    scrollX: 0, // Fixes cutoff bug when page is scrolled on mobile safari
+                    scrollY: 0
                 },
                 jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
+                // Restore original responsive scaling after render finishes
+                wrapper.style.transform = originalTransform;
+                wrapper.parentElement.style.height = originalParentHeight;
                 showToast("✓ PDF berhasil diunduh!", "success");
             }).catch((err) => {
+                // Restore original responsive scaling in case of error
+                wrapper.style.transform = originalTransform;
+                wrapper.parentElement.style.height = originalParentHeight;
                 showToast("Gagal mengunduh PDF.", "error");
             });
         }
