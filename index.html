@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Kuitansi — Dian Pravita MUA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --rose: #c8748a;
+  --rose-light: #f5e8ec;
+  --rose-dark: #9e4f65;
+  --gold: #b8965a;
+  --gold-light: #f7f0e6;
+  --cream: #fdf9f6;
+  --ink: #2a1f1f;
+  --ink-soft: #5a4a4a;
+  --ink-muted: #9a8a8a;
+  --border: #e8dcd8;
+}
+
+body {
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* ── APP HEADER ── */
+.app-header { text-align: center; margin-bottom: 1.5rem; }
+.brand-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--rose); color: white;
+  padding: 7px 18px; border-radius: 100px;
+  font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; font-weight: 500; margin-bottom: 10px;
+}
+.app-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--ink); font-weight: 500; }
+.app-title span { color: var(--rose); }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 4px;
+  max-width: 1100px; margin: 0 auto 1.25rem;
+  background: white; border: 1px solid var(--border);
+  border-radius: 12px; padding: 4px;
+}
+.tab-btn {
+  flex: 1; padding: 9px 12px;
+  border: none; background: transparent;
+  border-radius: 9px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: var(--ink-muted);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+.tab-btn.active {
+  background: var(--rose); color: white;
+}
+.tab-btn i { font-size: 15px; }
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  max-width: 1100px; margin: 0 auto;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .layout { grid-template-columns: 1fr; }
+  .app-title { font-size: 22px; }
+}
+
+/* ── PANEL ── */
+.panel {
+  background: white; border-radius: 16px;
+  border: 1px solid var(--border); overflow: hidden;
+}
+.panel-header {
+  background: var(--rose-light); padding: 12px 18px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-header i { color: var(--rose); font-size: 16px; }
+.panel-header h2 {
+  font-size: 12px; font-weight: 500; color: var(--ink);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.panel-body { padding: 18px; }
+
+/* ── FORM ── */
+.field-group { margin-bottom: 14px; }
+.field-group label {
+  display: block; font-size: 10px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-muted); margin-bottom: 5px;
+}
+.field-row { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: center; }
+
+input[type="text"], input[type="number"], input[type="date"], textarea {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--ink); background: white; outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+input:focus, textarea:focus { border-color: var(--rose); }
+textarea { resize: vertical; min-height: 62px; }
+
+.nomor-preview {
+  font-size: 11px; color: var(--rose-dark); font-weight: 500;
+  background: var(--rose-light); border: 1px dashed var(--rose);
+  border-radius: 8px; padding: 10px; letter-spacing: 0.02em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.rp-wrap { position: relative; }
+.rp-prefix {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%); font-size: 14px;
+  font-weight: 500; color: var(--ink-soft); pointer-events: none;
+}
+.rp-wrap input { padding-left: 38px; }
+
+.terbilang-box {
+  font-size: 12px; color: var(--ink-soft); font-style: italic;
+  margin-top: 7px; padding: 8px 12px;
+  background: var(--gold-light); border-radius: 6px;
+  border-left: 3px solid var(--gold); min-height: 32px; line-height: 1.5;
+}
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.btn {
+  flex: 1; padding: 11px 10px; border-radius: 10px;
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: opacity 0.2s, transform 0.1s; white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-rose { background: var(--rose); color: white; }
+.btn-rose:hover:not(:disabled) { opacity: 0.88; }
+.btn-gold { background: var(--gold); color: white; }
+.btn-gold:hover:not(:disabled) { opacity: 0.88; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink-soft); }
+.btn-outline:hover { background: var(--rose-light); border-color: var(--rose); color: var(--rose-dark); }
+.btn-danger { background: transparent; border: 1px solid #f0c0c0; color: #9e3535; font-size: 12px; }
+.btn-danger:hover { background: #fdf0f0; }
+
+/* ── UPLOAD AREA ── */
+.upload-section { max-width: 1100px; margin: 0 auto; }
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+@media (max-width: 640px) { .upload-grid { grid-template-columns: 1fr; } }
+
+.upload-box {
+  border: 2px dashed var(--border); border-radius: 12px;
+  padding: 24px 20px; text-align: center;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  background: white;
+}
+.upload-box:hover { border-color: var(--rose); background: var(--rose-light); }
+.upload-box i { font-size: 32px; color: var(--ink-muted); margin-bottom: 8px; display: block; }
+.upload-box p { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+.upload-box small { font-size: 11px; color: var(--ink-muted); }
+input[type="file"] { display: none; }
+
+.preview-img-wrap {
+  margin-top: 14px; position: relative;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border); background: #f9f5f3;
+  min-height: 80px; display: flex; align-items: center; justify-content: center;
+}
+.preview-img-wrap img {
+  max-width: 100%; max-height: 140px;
+  object-fit: contain; display: block; padding: 8px;
+}
+.preview-img-wrap .empty-hint {
+  font-size: 12px; color: var(--ink-muted); font-style: italic;
+}
+
+.upload-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: white;
+  padding: 10px 22px; border-radius: 100px;
+  font-size: 13px; opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none; z-index: 999;
+  white-space: nowrap; font-family: 'DM Sans', sans-serif;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: #2e7d52; }
+.toast.error { background: #9e3535; }
+
+/* ── RECEIPT ── */
+.receipt-preview { background: white; position: relative; overflow: hidden; }
+
+.receipt-watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-28deg);
+  font-family: 'Playfair Display', serif; font-size: 44px;
+  color: rgba(200,116,138,0.06); font-weight: 600;
+  letter-spacing: 0.1em; white-space: nowrap;
+  pointer-events: none; user-select: none;
+}
+
+.receipt-top {
+  background: linear-gradient(135deg, #2a1f1f 0%, #4a2a35 100%);
+  padding: 20px 24px 16px; position: relative; overflow: hidden;
+}
+.receipt-top::after {
+  content: ''; position: absolute; right: -18px; top: -18px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(200,116,138,0.18);
+}
+
+/* Logo area di header */
+.receipt-logo-area {
+  display: flex; align-items: center; gap: 12px;
+}
+.receipt-logo-img {
+  height: 48px; width: auto; max-width: 120px;
+  object-fit: contain; display: block;
+}
+.receipt-logo-text {
+  display: flex; flex-direction: column;
+}
+.receipt-brand {
+  font-family: 'Playfair Display', serif; font-size: 20px;
+  font-weight: 600; letter-spacing: 0.04em; color: white; line-height: 1.2;
+}
+.receipt-brand-sub {
+  font-size: 8px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 3px;
+}
+
+.receipt-kuitansi-label {
+  font-family: 'Playfair Display', serif; font-size: 15px;
+  color: var(--rose); letter-spacing: 0.06em; text-align: right;
+}
+.receipt-nomor {
+  font-size: 9px; color: rgba(255,255,255,0.5);
+  margin-top: 3px; letter-spacing: 0.04em; text-align: right;
+}
+
+.receipt-divider { height: 2px; background: linear-gradient(to right, var(--rose), var(--gold), transparent); }
+.receipt-body { padding: 18px 24px 0; }
+
+.receipt-field { margin-bottom: 14px; }
+.receipt-field-label {
+  font-size: 8px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--ink-muted);
+  margin-bottom: 4px; font-weight: 500;
+}
+.receipt-field-value {
+  font-size: 13px; color: var(--ink);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px; min-height: 24px; line-height: 1.4;
+}
+.receipt-field-value.highlight {
+  font-family: 'Playfair Display', serif; font-size: 15px;
+  color: var(--rose-dark); font-weight: 500;
+}
+
+.receipt-nominal-box {
+  background: linear-gradient(135deg, #2a1f1f, #4a2a35);
+  color: white; border-radius: 10px;
+  padding: 12px 18px; margin-top: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.receipt-nominal-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.65; }
+.receipt-nominal-value { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; color: var(--rose); }
+
+.receipt-footer {
+  padding: 14px 24px 20px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  border-top: 1px solid var(--border); margin-top: 16px;
+}
+.receipt-city-date { font-size: 11px; color: var(--ink-soft); }
+
+.receipt-ttd { text-align: center; }
+.receipt-ttd-sig {
+  height: 52px; display: flex; align-items: center; justify-content: center;
+}
+.receipt-ttd-sig img { max-height: 52px; max-width: 120px; object-fit: contain; }
+.receipt-ttd-name {
+  font-family: 'Playfair Display', serif; font-size: 13px;
+  color: var(--ink); font-weight: 500;
+  border-top: 1px solid var(--ink-muted);
+  padding-top: 5px; margin-top: 4px;
+}
+.receipt-ttd-role { font-size: 9px; color: var(--ink-muted); letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand-badge"><i class="ti ti-sparkles"></i> Dian Pravita</div>
+  <div class="app-title">Generator <span>Kuitansi</span></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('kuitansi', this)">
+    <i class="ti ti-file-invoice"></i> Buat Kuitansi
+  </button>
+  <button class="tab-btn" onclick="switchTab('pengaturan', this)">
+    <i class="ti ti-settings"></i> Logo & Tanda Tangan
+  </button>
+</div>
+
+<!-- TAB: KUITANSI -->
+<div class="tab-pane active" id="tab-kuitansi">
+  <div class="layout">
+
+    <!-- FORM -->
+    <div class="panel">
+      <div class="panel-header">
+        <i class="ti ti-edit"></i>
+        <h2>Isi Kuitansi</h2>
+      </div>
+      <div class="panel-body">
+
+        <div class="field-group">
+          <label>Nomor Urut</label>
+          <div class="field-row">
+            <input type="number" id="nomorUrut" value="15" min="1" max="9999" oninput="updatePreview()">
+            <div class="nomor-preview" id="nomorPreview">NO. KUI-015/DP/6/2026</div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Tanggal Kuitansi</label>
+          <input type="date" id="tanggal" oninput="updatePreview()">
+        </div>
+
+        <div class="field-group">
+          <label>Telah Terima Dari</label>
+          <input type="text" id="dariNama" placeholder="Nama klien..." oninput="updatePreview()">
+        </div>
+
+        <div class="field-group">
+          <label>Uang Sejumlah (Rp)</label>
+          <div class="rp-wrap">
+            <span class="rp-prefix">Rp</span>
+            <input type="number" id="nominal" placeholder="6000000" oninput="updatePreview()">
+          </div>
+          <div class="terbilang-box" id="terbilangForm">—</div>
+        </div>
+
+        <div class="field-group">
+          <label>Untuk Pembayaran</label>
+          <textarea id="keperluan" placeholder="cth: Jasa makeup pengantin + sewa kebaya..." oninput="updatePreview()"></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-outline" onclick="resetForm()">
+            <i class="ti ti-refresh"></i> Reset
+          </button>
+          <button class="btn btn-gold" id="btnSheets" onclick="saveToSheets()">
+            <i class="ti ti-table"></i> Sheets
+          </button>
+          <button class="btn btn-rose" onclick="downloadPDF()">
+            <i class="ti ti-download"></i> PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="panel">
+      <div class="panel-header">
+        <i class="ti ti-eye"></i>
+        <h2>Preview Kuitansi</h2>
+      </div>
+      <div class="receipt-preview" id="receiptPreview">
+        <div class="receipt-watermark">KUITANSI</div>
+
+        <div class="receipt-top">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+            <div class="receipt-logo-area">
+              <!-- Logo tampil jika ada, fallback ke teks -->
+              <img id="pvLogo" class="receipt-logo-img" src="" alt="Logo" style="display:none;">
+              <div class="receipt-logo-text">
+                <div class="receipt-brand" id="pvBrandName">Dian Pravita</div>
+                <div class="receipt-brand-sub">MAKEUP &amp; KEBAYA</div>
+              </div>
+            </div>
+            <div style="flex-shrink:0;">
+              <div class="receipt-kuitansi-label">Kuitansi</div>
+              <div class="receipt-nomor" id="pvNomor">NO. KUI-015/DP/6/2026</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="receipt-divider"></div>
+
+        <div class="receipt-body">
+          <div class="receipt-field">
+            <div class="receipt-field-label">Telah Terima Dari</div>
+            <div class="receipt-field-value highlight" id="pvDari">—</div>
+          </div>
+          <div class="receipt-field">
+            <div class="receipt-field-label">Uang Sejumlah</div>
+            <div class="receipt-field-value" id="pvTerbilang">—</div>
+          </div>
+          <div class="receipt-field">
+            <div class="receipt-field-label">Untuk Pembayaran</div>
+            <div class="receipt-field-value" id="pvKeperluan">—</div>
+          </div>
+          <div class="receipt-nominal-box">
+            <div class="receipt-nominal-label">Jumlah</div>
+            <div class="receipt-nominal-value" id="pvNominal">Rp 0</div>
+          </div>
+        </div>
+
+        <div class="receipt-footer">
+          <div class="receipt-city-date" id="pvDate">Semarang, — — —</div>
+          <div class="receipt-ttd">
+            <div class="receipt-ttd-sig">
+              <img id="pvTtd" src="" alt="Tanda tangan" style="display:none;">
+            </div>
+            <div class="receipt-ttd-name">Dian Pravita</div>
+            <div class="receipt-ttd-role">Makeup Artist</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB: PENGATURAN -->
+<div class="tab-pane" id="tab-pengaturan">
+  <div class="upload-section">
+    <div class="upload-grid">
+
+      <!-- LOGO -->
+      <div class="panel">
+        <div class="panel-header">
+          <i class="ti ti-photo"></i>
+          <h2>Logo Bisnis</h2>
+        </div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--ink-muted);margin-bottom:14px;line-height:1.6;">
+            Logo akan tampil di pojok kiri header kuitansi. Gunakan PNG dengan background transparan untuk hasil terbaik.
+          </p>
+          <input type="file" id="inputLogo" accept="image/*" onchange="handleUpload('logo', this)">
+          <div class="upload-box" onclick="document.getElementById('inputLogo').click()">
+            <i class="ti ti-upload"></i>
+            <p>Klik untuk unggah logo</p>
+            <small>PNG, JPG, SVG — maks. 2MB</small>
+          </div>
+          <div class="preview-img-wrap" id="wrapLogo">
+            <span class="empty-hint">Belum ada logo</span>
+          </div>
+          <div class="upload-actions">
+            <button class="btn btn-danger" onclick="hapusGambar('logo')" style="flex:1;">
+              <i class="ti ti-trash"></i> Hapus Logo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TANDA TANGAN -->
+      <div class="panel">
+        <div class="panel-header">
+          <i class="ti ti-writing"></i>
+          <h2>Tanda Tangan</h2>
+        </div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--ink-muted);margin-bottom:14px;line-height:1.6;">
+            Tanda tangan akan tampil di bagian bawah kuitansi di atas nama. Gunakan PNG background transparan atau putih.
+          </p>
+          <input type="file" id="inputTtd" accept="image/*" onchange="handleUpload('ttd', this)">
+          <div class="upload-box" onclick="document.getElementById('inputTtd').click()">
+            <i class="ti ti-upload"></i>
+            <p>Klik untuk unggah tanda tangan</p>
+            <small>PNG, JPG — maks. 2MB</small>
+          </div>
+          <div class="preview-img-wrap" id="wrapTtd">
+            <span class="empty-hint">Belum ada tanda tangan</span>
+          </div>
+          <div class="upload-actions">
+            <button class="btn btn-danger" onclick="hapusGambar('ttd')" style="flex:1;">
+              <i class="ti ti-trash"></i> Hapus Tanda Tangan
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="text-align:center;font-size:12px;color:var(--ink-muted);margin-top:1.25rem;">
+      <i class="ti ti-device-floppy" style="vertical-align:-2px;"></i>
+      Logo dan tanda tangan tersimpan otomatis di perangkat ini (local storage).
+    </p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz17ndpoGnT0AMoMzZINZxRByMeEwHrrEFE9pjYeQVePuU2Io_PGjLHn85N79ncFWlfqQ/exec';
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const SATUAN = ['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+
+/* ── TABS ── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── TERBILANG ── */
+function terbilang(n) {
+  n = Math.floor(n);
+  if (n === 0) return 'nol';
+  if (n < 0) return 'minus ' + terbilang(-n);
+  let k = '';
+  if (n >= 1000000000) { k += terbilang(Math.floor(n/1000000000)) + ' miliar '; n %= 1000000000; }
+  if (n >= 1000000)    { k += terbilang(Math.floor(n/1000000)) + ' juta '; n %= 1000000; }
+  if (n >= 1000) { k += (Math.floor(n/1000)===1 ? 'seribu' : terbilang(Math.floor(n/1000))+' ribu')+' '; n%=1000; }
+  if (n >= 100)  { k += (Math.floor(n/100)===1  ? 'seratus': SATUAN[Math.floor(n/100)]+' ratus')+' '; n%=100; }
+  if (n > 0) {
+    if (n < 12) k += SATUAN[n];
+    else if (n < 20) k += SATUAN[n-10]+' belas';
+    else { k += SATUAN[Math.floor(n/10)]+' puluh'; if(n%10) k+=' '+SATUAN[n%10]; }
+  }
+  return k.trim();
+}
+
+function formatRp(v) {
+  if (!v || parseInt(v) === 0) return 'Rp 0';
+  return 'Rp ' + parseInt(v).toLocaleString('id-ID');
+}
+
+function formatTanggal(d) {
+  if (!d) return '— — —';
+  const [y, m, dd] = d.split('-');
+  return `${parseInt(dd)} ${BULAN[parseInt(m)-1]} ${y}`;
+}
+
+function buildNomor() {
+  const urut = document.getElementById('nomorUrut').value || '1';
+  const pad  = String(parseInt(urut)).padStart(3, '0');
+  const tgl  = document.getElementById('tanggal').value;
+  let bln = new Date().getMonth() + 1, thn = new Date().getFullYear();
+  if (tgl) { const p = tgl.split('-'); bln = parseInt(p[1]); thn = parseInt(p[0]); }
+  return `NO. KUI-${pad}/DP/${bln}/${thn}`;
+}
+
+/* ── PREVIEW ── */
+function updatePreview() {
+  const nomor     = buildNomor();
+  const dari      = document.getElementById('dariNama').value;
+  const nominal   = document.getElementById('nominal').value;
+  const keperluan = document.getElementById('keperluan').value;
+  const tanggal   = document.getElementById('tanggal').value;
+
+  document.getElementById('nomorPreview').textContent = nomor;
+  document.getElementById('pvNomor').textContent      = nomor;
+  document.getElementById('pvDari').textContent       = dari || '—';
+  document.getElementById('pvKeperluan').textContent  = keperluan || '—';
+  document.getElementById('pvNominal').textContent    = formatRp(nominal);
+  document.getElementById('pvDate').textContent       = 'Semarang, ' + formatTanggal(tanggal);
+
+  if (nominal && parseInt(nominal) > 0) {
+    const tb  = terbilang(parseInt(nominal)) + ' rupiah';
+    const cap = tb.charAt(0).toUpperCase() + tb.slice(1);
+    document.getElementById('pvTerbilang').textContent   = cap;
+    document.getElementById('terbilangForm').textContent = cap;
+  } else {
+    document.getElementById('pvTerbilang').textContent   = '—';
+    document.getElementById('terbilangForm').textContent = '—';
+  }
+}
+
+/* ── UPLOAD & LOCAL STORAGE ── */
+function handleUpload(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('File terlalu besar (maks 2MB)', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    try {
+      localStorage.setItem('dp_' + type, dataUrl);
+    } catch(err) {
+      showToast('Penyimpanan penuh, coba hapus dulu', 'error'); return;
+    }
+    applyImage(type, dataUrl);
+    showToast('✓ ' + (type === 'logo' ? 'Logo' : 'Tanda tangan') + ' tersimpan!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyImage(type, dataUrl) {
+  if (type === 'logo') {
+    const pvLogo = document.getElementById('pvLogo');
+    pvLogo.src = dataUrl;
+    pvLogo.style.display = 'block';
+
+    const wrap = document.getElementById('wrapLogo');
+    wrap.innerHTML = `<img src="${dataUrl}" alt="Logo preview">`;
+  } else {
+    const pvTtd = document.getElementById('pvTtd');
+    pvTtd.src = dataUrl;
+    pvTtd.style.display = 'block';
+
+    const wrap = document.getElementById('wrapTtd');
+    wrap.innerHTML = `<img src="${dataUrl}" alt="TTD preview">`;
+  }
+}
+
+function hapusGambar(type) {
+  localStorage.removeItem('dp_' + type);
+  if (type === 'logo') {
+    const pvLogo = document.getElementById('pvLogo');
+    pvLogo.src = ''; pvLogo.style.display = 'none';
+    document.getElementById('wrapLogo').innerHTML = '<span class="empty-hint">Belum ada logo</span>';
+    document.getElementById('inputLogo').value = '';
+  } else {
+    const pvTtd = document.getElementById('pvTtd');
+    pvTtd.src = ''; pvTtd.style.display = 'none';
+    document.getElementById('wrapTtd').innerHTML = '<span class="empty-hint">Belum ada tanda tangan</span>';
+    document.getElementById('inputTtd').value = '';
+  }
+  showToast((type === 'logo' ? 'Logo' : 'Tanda tangan') + ' dihapus');
+}
+
+function loadSavedImages() {
+  const logo = localStorage.getItem('dp_logo');
+  const ttd  = localStorage.getItem('dp_ttd');
+  if (logo) applyImage('logo', logo);
+  if (ttd)  applyImage('ttd', ttd);
+}
+
+/* ── TOAST ── */
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+/* ── RESET ── */
+function resetForm() {
+  ['dariNama', 'nominal', 'keperluan'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+  updatePreview();
+}
+
+/* ── PDF ── */
+function downloadPDF() {
+  const el    = document.getElementById('receiptPreview');
+  const nomor = buildNomor().replace(/\//g, '-').replace(/\s/g, '_');
+  showToast('Menyiapkan PDF...');
+  html2pdf().set({
+    margin: 0,
+    filename: `Kuitansi_${nomor}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+  }).from(el).save().then(() => {
+    showToast('✓ PDF berhasil diunduh!', 'success');
+  });
+}
+
+/* ── SHEETS ── */
+async function saveToSheets() {
+  const dari      = document.getElementById('dariNama').value.trim();
+  const nominal   = document.getElementById('nominal').value;
+  const keperluan = document.getElementById('keperluan').value.trim();
+  const tanggal   = document.getElementById('tanggal').value;
+  if (!dari || !nominal || !tanggal) { showToast('⚠ Lengkapi nama, nominal & tanggal dulu', 'error'); return; }
+
+  const btn = document.getElementById('btnSheets');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2"></i> Menyimpan...';
+  showToast('Mengirim ke Google Sheets...');
+
+  const payload = {
+    nomor: buildNomor(), tanggal: formatTanggal(tanggal),
+    dari, terbilang: terbilang(parseInt(nominal)) + ' rupiah',
+    keperluan, nominal: parseInt(nominal)
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    showToast('✓ Tersimpan di Google Sheets!', 'success');
+  } catch(e) {
+    showToast('Gagal menyimpan ke Sheets', 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-table"></i> Sheets';
+}
+
+/* ── INIT ── */
+document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+updatePreview();
+loadSavedImages();
+</script>
+</body>
+</html>
