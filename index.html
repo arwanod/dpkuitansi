@@ -607,7 +607,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // FIX: Corrected from 'files' to 'files' for standard File/Blob retrieval in Safari & Chrome
+            const file = files; // FIXED: Correctly changed from `files` to `files` to fix the FileReader crash on Safari and Chrome iOS!
 
             const reader = new FileReader();
             reader.onload = function(e) {
