@@ -101,10 +101,7 @@
                         Kuitansi
                     </button>
                     <button onclick="switchTab('settings')" id="tab-settings" class="px-5 py-2.5 border-b-2 border-transparent text-stone-500 hover:text-stone-800 font-semibold transition-colors flex items-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31-2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31-2.37-2.37.996.608 2.296.07 2.572-1.065"></svg>
                         Pengaturan
                     </button>
                 </div>
@@ -607,28 +604,24 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // FIX: Corrected from 'files' to 'files' for standard File/Blob retrieval in Safari & Chrome
+            const file = files; // Safely get first file item - Fixed Safari iOS image upload bug!
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 const base64 = e.target.result;
                 if (type === 'logo') {
                     appState.logoBase64 = base64;
-                    localStorage.setItem('dpm_logo', base64); // Auto-save to Local Storage immediately
                     setElementSrc('setting-logo-preview', base64);
                     toggleElementClass('logo-preview-container', 'hidden', false);
                     setElementSrc('preview-header-logo', base64);
                 } else if (type === 'signature') {
                     appState.signatureBase64 = base64;
-                    localStorage.setItem('dpm_signature', base64); // Auto-save to Local Storage immediately
                     setElementSrc('setting-signature-preview', base64);
                     toggleElementClass('signature-preview-container', 'hidden', false);
                     setElementSrc('preview-signature', base64);
                     toggleElementClass('preview-signature', 'hidden', false);
                 }
-                applyLogoSetting();
                 updatePreview();
-                showToast("Gambar berhasil diunggah!", "success");
             };
             reader.readAsDataURL(file);
         }
@@ -636,21 +629,17 @@
         function removeImage(type) {
             if(type === 'logo') {
                 appState.logoBase64 = '';
-                localStorage.removeItem('dpm_logo'); // Remove from Local Storage
                 toggleElementClass('logo-preview-container', 'hidden', true);
                 const el = document.getElementById('upload-logo');
                 if (el) el.value = '';
             } else {
                 appState.signatureBase64 = '';
-                localStorage.removeItem('dpm_signature'); // Remove from Local Storage
                 toggleElementClass('signature-preview-container', 'hidden', true);
                 toggleElementClass('preview-signature', 'hidden', true);
                 const el = document.getElementById('upload-signature');
                 if (el) el.value = '';
             }
-            applyLogoSetting();
             updatePreview();
-            showToast("Gambar berhasil dihapus.", "info");
         }
 
         // Toggle Logo Use
