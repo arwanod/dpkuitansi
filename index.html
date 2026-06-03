@@ -70,21 +70,6 @@
             flex-shrink: 0;
             margin: 0 !important;
         }
-
-        /* This style is used strictly during PDF compilation 
-           to enforce perfect physical A5 Dimensions (148mm x 210mm)
-        */
-        .pdf-print-target {
-            width: 148mm !important;
-            height: 210mm !important;
-            padding: 8mm !important;
-            box-sizing: border-box !important;
-            background-color: #ffffff !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            position: relative !important;
-        }
     </style>
 </head>
 <body class="bg-stone-100 text-darkgrey-900 font-sans min-h-screen pb-12">
@@ -619,7 +604,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // Safely get first file item - Fixed Safari iOS image upload bug
+            const file = files; // Safely get first file item - Fixed Safari iOS image upload bug!
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -636,6 +621,7 @@
                     setElementSrc('preview-signature', base64);
                     toggleElementClass('preview-signature', 'hidden', false);
                 }
+                updatePreview();
             };
             reader.readAsDataURL(file);
         }
@@ -653,6 +639,7 @@
                 const el = document.getElementById('upload-signature');
                 if (el) el.value = '';
             }
+            updatePreview();
         }
 
         // Toggle Logo Use
@@ -706,8 +693,8 @@
             sandbox.style.position = 'fixed';
             sandbox.style.left = '-9999px';
             sandbox.style.top = '0';
-            sandbox.style.width = '148mm';
-            sandbox.style.height = '210mm';
+            sandbox.style.width = '520px';
+            sandbox.style.height = '735px';
             sandbox.style.zIndex = '-9999';
             document.body.appendChild(sandbox);
 
@@ -715,7 +702,13 @@
             const clonedReceipt = element.cloneNode(true);
             
             // Apply strict physical sizing values and strip outer drop shadows which force extra pages
-            clonedReceipt.className = "pdf-print-target";
+            clonedReceipt.className = "receipt-card p-10 relative border-4 border-[#2a2a2a] flex flex-col justify-between bg-white";
+            clonedReceipt.style.boxShadow = 'none';
+            clonedReceipt.style.transform = 'none';
+            clonedReceipt.style.margin = '0';
+            clonedReceipt.style.width = '520px';
+            clonedReceipt.style.height = '735px';
+            
             sandbox.appendChild(clonedReceipt);
 
             // Print configuration targeting crisp A5 Portrait layout with zero margin gaps
@@ -727,8 +720,8 @@
                     scale: 3.0, // High density crispness for pristine typography
                     useCORS: true, 
                     logging: false,
-                    width: 559.37,  // Precise pixel translation mapping for 148mm at 96 DPI
-                    height: 793.70, // Precise pixel translation mapping for 210mm at 96 DPI
+                    width: 520,  // Exact matching dimension with receipt-card style
+                    height: 735,
                     scrollX: 0,
                     scrollY: 0
                 },
