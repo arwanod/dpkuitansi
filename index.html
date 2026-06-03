@@ -589,6 +589,7 @@
             setElementText('form-terbilang', words ? `Terbilang: ${words}` : '');
         }
 
+        // --- STREAMING_CHUNK:Executing image parser and asset toggle handlers... ---
         // --- SETTINGS LOGIC ---
         function handleImageUpload(event, type) {
             const files = event.target.files;
@@ -665,11 +666,27 @@
             showToast("Pengaturan disimpan!", "success");
         }
 
-        // --- EXPORTS & ACTIONS (Optimized Safari iOS Compatibility Mode using Points Format) ---
+        // --- STREAMING_CHUNK:Implementing Safari iOS mobile viewport override... ---
+        // --- EXPORTS & ACTIONS (Optimized Safari iOS Compatibility Viewport Expansion) ---
         function downloadPDF() {
             const element = document.getElementById('receipt-canvas');
             if (!element) return;
             
+            // Save original viewport & body configurations to roll them back later
+            const viewportMeta = document.querySelector('meta[name="viewport"]');
+            const originalViewport = viewportMeta ? viewportMeta.getAttribute('content') : '';
+            const originalBodyStyle = document.body.getAttribute('style') || '';
+
+            // 1. Force viewport width to match kuitansi card width (520px). 
+            // This prevents the Safari mobile WebKit rendering engine from executing responsive breakpoints and wrapping text!
+            if (viewportMeta) {
+                viewportMeta.setAttribute('content', 'width=520, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+            }
+
+            // 2. Adjust the body layout width to 520px so Safari processes standard rendering coordinates correctly
+            document.body.style.width = '520px';
+            document.body.style.minWidth = '520px';
+
             const inputNo = document.getElementById('input-no');
             const inputName = document.getElementById('input-name');
             const noUrut = inputNo ? inputNo.value : '000';
@@ -680,22 +697,22 @@
 
             showToast("Menyiapkan PDF...");
 
-            // Create off-screen fixed environment with absolute pixel width
+            // Create off-screen sandboxed environment.
             const sandbox = document.createElement('div');
             sandbox.style.position = 'fixed';
-            sandbox.style.left = '-9999px';
+            sandbox.style.left = '0';
             sandbox.style.top = '0';
             sandbox.style.width = '520px';
             sandbox.style.height = '735px';
             sandbox.style.zIndex = '-9999';
-            sandbox.style.overflow = 'hidden';
-            sandbox.style.background = '#ffffff';
+            sandbox.style.opacity = '0';
+            sandbox.style.pointerEvents = 'none';
             document.body.appendChild(sandbox);
 
             // Clone our receipt card element
             const clonedReceipt = element.cloneNode(true);
             
-            // Re-apply absolute container styling on the clone in exact pixels to prevent Safari wrapping bugs
+            // Re-apply absolute container styling on the clone inside sandbox to prevent shadow overflows
             clonedReceipt.className = "p-10 relative border-4 border-[#2a2a2a] flex flex-col justify-between bg-white";
             clonedReceipt.style.boxShadow = 'none';
             clonedReceipt.style.transform = 'none';
@@ -708,35 +725,52 @@
             sandbox.appendChild(clonedReceipt);
 
             // Target dimensions mapping directly to PT unit standard (Pixel value * 0.75 ratio)
-            // This prevents the Safari Webkit layout engine from changing scale and causing text-wrapping
+            // 520px * 0.75 = 390pt, 735px * 0.75 = 551.25pt. Fits perfectly into 1 single page!
             const opt = {
                 margin:       0, 
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 1.0 },
                 html2canvas:  { 
-                    scale: 3, // Premium high-DPI quality
+                    scale: 3, // Ultra-sharp DPI quality
                     useCORS: true, 
                     logging: false,
                     scrollX: 0,
                     scrollY: 0,
                     width: 520,
-                    height: 735
+                    height: 735,
+                    windowWidth: 520,
+                    windowHeight: 735
                 },
                 jsPDF:        { unit: 'pt', format: [390, 551.25], orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(clonedReceipt).save().then(() => {
-                if (sandbox.parentNode) {
-                    document.body.removeChild(sandbox);
-                }
-                showToast("✓ PDF berhasil diunduh!", "success");
-            }).catch((err) => {
-                console.error("PDF generation error: ", err);
-                if (sandbox.parentNode) {
-                    document.body.removeChild(sandbox);
-                }
-                showToast("Gagal mengunduh PDF.", "error");
-            });
+            // 3. 300ms Delay allows the mobile browser to re-render the layout accurately at 520px before capturing
+            setTimeout(() => {
+                html2pdf().set(opt).from(clonedReceipt).save().then(() => {
+                    // Cleanup sandbox
+                    if (sandbox.parentNode) {
+                        document.body.removeChild(sandbox);
+                    }
+                    
+                    // 4. Instantly roll back original mobile viewport settings to restore responsive layout on screen
+                    if (viewportMeta && originalViewport) {
+                        viewportMeta.setAttribute('content', originalViewport);
+                    }
+                    document.body.setAttribute('style', originalBodyStyle);
+                    
+                    showToast("✓ PDF berhasil diunduh!", "success");
+                }).catch((err) => {
+                    console.error("PDF generation error: ", err);
+                    if (sandbox.parentNode) {
+                        document.body.removeChild(sandbox);
+                    }
+                    if (viewportMeta && originalViewport) {
+                        viewportMeta.setAttribute('content', originalViewport);
+                    }
+                    document.body.setAttribute('style', originalBodyStyle);
+                    showToast("Gagal mengunduh PDF.", "error");
+                });
+            }, 300);
         }
 
         function shareWhatsApp() {
