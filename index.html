@@ -665,7 +665,7 @@
             showToast("Pengaturan disimpan!", "success");
         }
 
-        // --- EXPORTS & ACTIONS (Optimized Safari iOS Compatibility Mode) ---
+        // --- EXPORTS & ACTIONS (Optimized Safari iOS Compatibility Mode using Points Format) ---
         function downloadPDF() {
             const element = document.getElementById('receipt-canvas');
             if (!element) return;
@@ -680,51 +680,49 @@
 
             showToast("Menyiapkan PDF...");
 
-            // Create off-screen sandboxed environment.
-            // We use standard A5 Millimeter dimensions (148mm x 210mm) and absolute width matching for Safari.
+            // Create off-screen fixed environment with absolute pixel width
             const sandbox = document.createElement('div');
-            sandbox.style.position = 'absolute';
+            sandbox.style.position = 'fixed';
             sandbox.style.left = '-9999px';
-            sandbox.style.top = '-9999px';
-            sandbox.style.width = '148mm';
-            sandbox.style.height = '210mm';
-            sandbox.style.padding = '0';
-            sandbox.style.margin = '0';
+            sandbox.style.top = '0';
+            sandbox.style.width = '520px';
+            sandbox.style.height = '735px';
+            sandbox.style.zIndex = '-9999';
             sandbox.style.overflow = 'hidden';
-            sandbox.style.boxSizing = 'border-box';
             sandbox.style.background = '#ffffff';
             document.body.appendChild(sandbox);
 
             // Clone our receipt card element
             const clonedReceipt = element.cloneNode(true);
             
-            // Re-apply absolute container styling on the clone to prevent Safari clipping & shadow leakage
+            // Re-apply absolute container styling on the clone in exact pixels to prevent Safari wrapping bugs
             clonedReceipt.className = "p-10 relative border-4 border-[#2a2a2a] flex flex-col justify-between bg-white";
             clonedReceipt.style.boxShadow = 'none';
             clonedReceipt.style.transform = 'none';
             clonedReceipt.style.margin = '0';
-            clonedReceipt.style.width = '148mm';
-            clonedReceipt.style.height = '210mm';
+            clonedReceipt.style.width = '520px';
+            clonedReceipt.style.height = '735px';
             clonedReceipt.style.position = 'relative';
             clonedReceipt.style.boxSizing = 'border-box';
             
             sandbox.appendChild(clonedReceipt);
 
-            // Target dimensions using native 'mm' unit to ensure perfect non-clipping in iOS Safari Webkit.
+            // Target dimensions mapping directly to PT unit standard (Pixel value * 0.75 ratio)
+            // This prevents the Safari Webkit layout engine from changing scale and causing text-wrapping
             const opt = {
                 margin:       0, 
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 1.0 },
                 html2canvas:  { 
-                    scale: 3, // Ultra-sharp render for text & signatures
+                    scale: 3, // Premium high-DPI quality
                     useCORS: true, 
                     logging: false,
                     scrollX: 0,
                     scrollY: 0,
-                    width: clonedReceipt.offsetWidth,
-                    height: clonedReceipt.offsetHeight
+                    width: 520,
+                    height: 735
                 },
-                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+                jsPDF:        { unit: 'pt', format: [390, 551.25], orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(clonedReceipt).save().then(() => {
