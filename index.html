@@ -77,7 +77,7 @@
         .pdf-print-target {
             width: 148mm !important;
             height: 210mm !important;
-            padding: 10mm !important;
+            padding: 8mm !important;
             box-sizing: border-box !important;
             background-color: #ffffff !important;
             display: flex !important;
@@ -243,34 +243,40 @@
                                     </p>
                                 </div>
 
-                                <!-- Main Contents (Form Rows) -->
-                                <div class="space-y-6 flex-grow my-3">
-                                    <!-- Row 1: Client Name -->
-                                    <div class="flex items-start gap-4">
-                                        <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Telah terima dari</span>
-                                        <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[2rem]">
-                                            <span id="preview-name" class="text-darkgrey-900 font-semibold font-serif text-base italic"></span>
-                                        </div>
-                                    </div>
+                                <!-- Main Contents (Form Rows - Rebuilt with HTML Tables for unmatched CSS render stability) -->
+                                <div class="flex-grow my-3">
+                                    <table class="w-full border-collapse">
+                                        <tbody>
+                                            <!-- Row 1: Client Name -->
+                                            <tr class="align-top">
+                                                <td class="w-[120px] pb-5 text-stone-500 font-serif text-xs italic pt-1">Telah terima dari</td>
+                                                <td class="w-[15px] pb-5 text-gold-500 font-bold text-xs pt-1 text-center">:</td>
+                                                <td class="pb-5 border-b border-stone-200">
+                                                    <span id="preview-name" class="text-darkgrey-900 font-semibold font-serif text-base italic break-words block min-h-[1.5rem]"></span>
+                                                </td>
+                                            </tr>
 
-                                    <!-- Row 2: Words / Terbilang -->
-                                    <div class="flex items-start gap-4">
-                                        <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Uang Sebanyak</span>
-                                        <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[3.2rem] bg-stone-50/50 px-2 rounded-sm border-dashed border-stone-300 font-medium">
-                                            <span id="preview-words" class="text-stone-700 font-serif text-xs italic leading-relaxed capitalize font-semibold"></span>
-                                        </div>
-                                    </div>
+                                            <!-- Row 2: Words / Terbilang -->
+                                            <tr class="align-top">
+                                                <td class="w-[120px] pb-5 text-stone-500 font-serif text-xs italic pt-1">Uang Sebanyak</td>
+                                                <td class="w-[15px] pb-5 text-gold-500 font-bold text-xs pt-1 text-center">:</td>
+                                                <td class="pb-5 border-b border-stone-200">
+                                                    <div class="bg-stone-50/50 px-2 py-1 rounded-sm border-dashed border-stone-300 border min-h-[3.2rem]">
+                                                        <span id="preview-words" class="text-stone-700 font-serif text-xs italic leading-relaxed capitalize font-semibold break-words block"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
 
-                                    <!-- Row 3: For Payment -->
-                                    <div class="flex items-start gap-4">
-                                        <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Untuk Pembayaran</span>
-                                        <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[3.5rem]">
-                                            <span id="preview-for" class="text-darkgrey-900 text-xs leading-relaxed font-medium"></span>
-                                        </div>
-                                    </div>
+                                            <!-- Row 3: For Payment -->
+                                            <tr class="align-top">
+                                                <td class="w-[120px] pb-5 text-stone-500 font-serif text-xs italic pt-1">Untuk Pembayaran</td>
+                                                <td class="w-[15px] pb-5 text-gold-500 font-bold text-xs pt-1 text-center">:</td>
+                                                <td class="pb-5 border-b border-stone-200">
+                                                    <span id="preview-for" class="text-darkgrey-900 text-xs leading-relaxed font-medium break-words block min-h-[2.5rem]"></span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
                                 <!-- Footer Layout (Signatures & Amount Box) -->
@@ -423,6 +429,7 @@
             if (el) el.checked = checked;
         }
 
+        // Safe Image source setter
         function setElementSrc(id, src) {
             const el = document.getElementById(id);
             if (el) el.src = src;
@@ -612,7 +619,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // Safely get first file item
+            const file = files; // Safely get first file item - Fixed Safari iOS image upload bug
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -678,7 +685,7 @@
             showToast("Pengaturan visual disimpan!", "success");
         }
 
-        // --- EXPORTS & ACTIONS (With Perfect mm Sandboxed A5 Layout) ---
+        // --- EXPORTS & ACTIONS (With mm Sandbox Renderer Fix for perfect A5 Portrait PDF) ---
         function downloadPDF() {
             const element = document.getElementById('receipt-canvas');
             if (!element) return;
@@ -694,7 +701,7 @@
             showToast("Menyiapkan PDF...");
 
             // --- SAFARI & CHROME IOS FIXED PDF SANDBOX ---
-            // Create a temporary sandboxed node to render precisely on mm values (Avoiding CSS translation bugs)
+            // Create a temporary sandboxed node to render precisely on mm values (Avoiding parent overflow & shadow margin bugs)
             const sandbox = document.createElement('div');
             sandbox.style.position = 'fixed';
             sandbox.style.left = '-9999px';
@@ -707,7 +714,7 @@
             // Clone our kuitansi element
             const clonedReceipt = element.cloneNode(true);
             
-            // Apply strict physical sizing values and strip outer drop shadows
+            // Apply strict physical sizing values and strip outer drop shadows which force extra pages
             clonedReceipt.className = "pdf-print-target";
             sandbox.appendChild(clonedReceipt);
 
@@ -717,7 +724,7 @@
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
-                    scale: 3.0, // High density crispness
+                    scale: 3.0, // High density crispness for pristine typography
                     useCORS: true, 
                     logging: false,
                     width: 559.37,  // Precise pixel translation mapping for 148mm at 96 DPI
