@@ -63,8 +63,8 @@
            Optimized to fit beautifully on A5 Portrait export without overlapping or breaking into 2 pages.
         */
         .receipt-card {
-            width: 530px;
-            height: 750px;
+            width: 520px;
+            height: 740px;
             background-color: #ffffff;
             box-sizing: border-box;
             flex-shrink: 0;
@@ -140,7 +140,7 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-stone-600 tracking-wider uppercase mb-1">Telah terima dari (Nama Klien)</label>
-                            <input type="text" id="input-name" placeholder="Kak Sarah" class="w-full px-4 py-2 border border-stone-200 rounded-lg text-sm focus:ring-1 focus:ring-gold-500 focus:border-gold-500 outline-none transition-all" oninput="updatePreview()">
+                            <input type="text" id="input-name" placeholder="Giga Sans" class="w-full px-4 py-2 border border-stone-200 rounded-lg text-sm focus:ring-1 focus:ring-gold-500 focus:border-gold-500 outline-none transition-all" oninput="updatePreview()">
                         </div>
 
                         <div>
@@ -151,6 +151,8 @@
                                 </div>
                                 <input type="text" id="input-amount" placeholder="0" class="w-full pl-12 pr-4 py-2 border border-stone-200 rounded-lg text-sm focus:ring-1 focus:ring-gold-500 focus:border-gold-500 outline-none transition-all font-semibold text-darkgrey-900" oninput="formatRupiahInput(this); updatePreview()">
                             </div>
+                            <!-- Live Terbilang Info Helper Below Input Field -->
+                            <p id="form-terbilang" class="text-xs text-gold-600 italic mt-1.5 min-h-[1.25rem] leading-relaxed font-serif"></p>
                         </div>
 
                         <div>
@@ -239,7 +241,7 @@
                                     <div class="flex items-start gap-4">
                                         <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Uang Sebanyak</span>
                                         <span class="text-gold-500 font-bold text-xs pt-1">:</span>
-                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[3.2rem] bg-stone-50/50 px-2 rounded-sm border-dashed border-stone-300">
+                                        <div class="flex-grow border-b border-stone-200 pb-1 min-h-[3.2rem] bg-stone-50/50 px-2 rounded-sm border-dashed border-stone-300 font-medium">
                                             <span id="preview-words" class="text-stone-700 font-serif text-xs italic leading-relaxed capitalize"></span>
                                         </div>
                                     </div>
@@ -249,7 +251,7 @@
                                         <span class="w-32 flex-shrink-0 text-stone-500 font-serif text-xs italic pt-1">Untuk Pembayaran</span>
                                         <span class="text-gold-500 font-bold text-xs pt-1">:</span>
                                         <div class="flex-grow border-b border-stone-200 pb-0.5 min-h-[3.5rem]">
-                                            <span id="preview-for" class="text-darkgrey-900 text-xs leading-relaxed"></span>
+                                            <span id="preview-for" class="text-darkgrey-900 text-xs leading-relaxed font-medium"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -426,10 +428,10 @@
             const wrapper = document.getElementById('preview-scale-wrapper');
             if (!wrapper) return;
             const parentWidth = wrapper.parentElement.clientWidth;
-            // Target width is adjusted to 530px A5 Portrait
-            const scale = Math.min(1, parentWidth / 530);
+            // Target width is adjusted to 520px A5 Portrait safely
+            const scale = Math.min(1, parentWidth / 520);
             wrapper.style.transform = `scale(${scale})`;
-            wrapper.parentElement.style.height = `${750 * scale}px`;
+            wrapper.parentElement.style.height = `${740 * scale}px`;
         }
 
         // Initialize UI values on startup
@@ -586,13 +588,16 @@
                 words = terbilang(amountNum) + " Rupiah";
             }
             setElementText('preview-words', words);
+            
+            // Update live Terbilang helper in the left form panel
+            setElementText('form-terbilang', words ? `Terbilang: ${words}` : '');
         }
 
         // --- SETTINGS LOGIC ---
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files; // Restored the files index array accessor correctly to prevent crashes on Safari iOS
+            const file = files; // Access safely
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -681,7 +686,7 @@
             wrapper.style.transform = 'none';
             wrapper.parentElement.style.height = 'auto';
 
-            // Safari iOS Fix 2: Explicit width, height, and scroll bounds setup
+            // Safari iOS Fix 2: Explicit width, height, and scroll bounds setup to prevent cut-offs
             const opt = {
                 margin:       0, 
                 filename:     filename,
@@ -690,9 +695,9 @@
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    width: 530,
-                    height: 750,
-                    scrollX: 0, // Fixes cutoff bug when page is scrolled on mobile safari
+                    width: 520,  // Exact width matches .receipt-card
+                    height: 740, // Exact height matches .receipt-card
+                    scrollX: 0,
                     scrollY: 0
                 },
                 jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
