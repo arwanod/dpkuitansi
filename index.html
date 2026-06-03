@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- html2pdf for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- html2canvas for high quality image generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -41,7 +41,6 @@
             }
         }
     </script>
-    
     <style>
         /* Custom scrollbar for preview area */
         .custom-scroll::-webkit-scrollbar {
@@ -77,7 +76,9 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-4 right-4 z-50 transform transition-all duration-300 translate-y-[-100%] opacity-0 bg-darkgrey-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 border border-gold-500/30">
-        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toast-icon">
+            <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </span>
         <span id="toast-message">Notifikasi</span>
     </div>
 
@@ -152,7 +153,7 @@
                                 </div>
                                 <input type="text" inputmode="numeric" id="input-amount" placeholder="0" class="w-full pl-12 pr-4 py-2 border border-stone-200 rounded-lg text-sm focus:ring-1 focus:ring-gold-500 focus:border-gold-500 outline-none transition-all font-semibold text-darkgrey-900" oninput="formatRupiahInput(this); updatePreview()">
                             </div>
-                            <!-- Live Terbilang Info Helper Below Input Field -->
+                            <!-- Live Terbilang Info Helper -->
                             <p id="form-terbilang" class="text-xs text-gold-600 italic mt-1.5 min-h-[1.25rem] leading-relaxed font-serif"></p>
                         </div>
 
@@ -165,9 +166,9 @@
 
                 <!-- Action Buttons -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 space-y-3">
-                    <button onclick="downloadPDF()" class="w-full bg-darkgrey-900 hover:bg-darkgrey-800 text-gold-500 border border-gold-500/50 font-semibold py-3 px-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 text-sm tracking-wide">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Unduh PDF Kuitansi
+                    <button onclick="downloadImage()" class="w-full bg-darkgrey-900 hover:bg-darkgrey-800 text-gold-500 border border-gold-500/50 font-semibold py-3 px-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 text-sm tracking-wide">
+                        <svg class="w-4 h-4 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Simpan Gambar Kuitansi (Presisi)
                     </button>
                     
                     <button onclick="shareWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 text-sm tracking-wide">
@@ -191,7 +192,7 @@
                     <div id="preview-scale-wrapper" class="origin-top transition-transform duration-200">
                         
                         <!-- KUITANSI CANVAS (Perfect A5 Portrait Element) -->
-                        <div id="receipt-canvas" class="receipt-card p-10 relative shadow-2xl border-4 border-[#2a2a2a] flex flex-col justify-between">
+                        <div id="receipt-canvas" class="receipt-card p-10 relative shadow-2xl border-4 border-[#2a2a2a] flex flex-col justify-between bg-white">
                             <!-- Double Decorative Inner Border in Gold -->
                             <div class="absolute inset-1.5 border border-gold-500/40 pointer-events-none"></div>
                             <div class="absolute inset-3 border border-gold-500/20 pointer-events-none"></div>
@@ -219,16 +220,16 @@
                                     </div>
                                 </div>
 
-                                <!-- Title & Receipt Number (NO. KUI under title) -->
+                                <!-- Title & Receipt Number -->
                                 <div class="text-center my-6">
                                     <h2 class="text-2xl font-serif text-darkgrey-900 uppercase tracking-[0.3em] font-bold">Kuitansi</h2>
                                     <p class="text-xs font-semibold tracking-widest text-gold-600 mt-1">
-                                        NO. <span id="preview-no" class="font-serif text-[11px]">KUI-015/DP/6/2026</span>
+                                        NO. <span id="preview-no" class="font-sans text-[11px]">KUI-015/DP/6/2026</span>
                                     </p>
                                 </div>
 
-                                <!-- Main Contents (Form Rows - Rebuilt with HTML Tables for unmatched CSS render stability) -->
-                                <div class="flex-grow my-3">
+                                <!-- Main Contents (Form Rows using Tables) -->
+                                <div class="flex-grow my-3 text-left">
                                     <table class="w-full border-collapse">
                                         <tbody>
                                             <!-- Row 1: Client Name -->
@@ -266,9 +267,9 @@
                                 <!-- Footer Layout (Signatures & Amount Box) -->
                                 <div class="flex justify-between items-end mt-5 pt-4 border-t border-stone-100">
                                     <!-- Nominal Box -->
-                                    <div class="bg-darkgrey-900 text-white p-3 px-5 rounded-sm shadow-md inline-block min-w-[210px] border-b-4 border-gold-500">
+                                    <div class="bg-darkgrey-900 text-white p-3 px-5 rounded-sm shadow-md inline-block min-w-[210px] border-b-4 border-gold-500 text-left">
                                         <p class="text-[8px] font-bold tracking-[0.25em] text-gold-500 uppercase mb-1">Jumlah Nominal</p>
-                                        <p class="text-xl font-bold tracking-wider font-sans text-white">Rp <span id="preview-amount" class="text-gold-100 font-semibold">0</span></p>
+                                        <p class="text-xl font-bold tracking-wider font-sans text-white">Rp <span id="preview-amount" class="text-gold-100">0</span></p>
                                     </div>
 
                                     <!-- Sign & Date Area -->
@@ -276,7 +277,7 @@
                                         <p id="preview-date" class="text-stone-500 font-medium text-[10px] mb-2.5"></p>
                                         
                                         <div class="h-14 flex items-center justify-center relative mb-1">
-                                            <!-- Embedded Signature Uploaded -->
+                                            <!-- Embedded Signature -->
                                             <img id="preview-signature" src="" alt="Tanda Tangan" class="max-h-full max-w-full hidden absolute z-10 opacity-90 transition-all">
                                         </div>
                                         
@@ -289,12 +290,11 @@
                         
                     </div>
                 </div>
-                <!-- End of Scaling Wrapper -->
             </div>
         </div>
 
         <!-- TAB 2: SETTINGS (Admin Personalization) -->
-        <div id="view-settings" class="hidden max-w-3xl mx-auto space-y-6">
+        <div id="view-settings" class="hidden max-w-3xl mx-auto space-y-6 text-left">
             
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-stone-200">
                 <h2 class="text-lg font-serif font-semibold text-darkgrey-900 mb-2">Integrasi Data</h2>
@@ -408,12 +408,12 @@
             if (el) el.value = val;
         }
 
-        // --- STREAMING_CHUNK:Menambahkan fungsi helper untuk memuat setelan gambar kustom... ---
         function setElementChecked(id, checked) {
             const el = document.getElementById(id);
             if (el) el.checked = checked;
         }
 
+        // Safe Image source setter
         function setElementSrc(id, src) {
             const el = document.getElementById(id);
             if (el) el.src = src;
@@ -495,7 +495,6 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Menyusun kalkulator terbilang bahasa Indonesia dan formatting nominal... ---
         // --- DATE CHANGE LOGIC ---
         let formattedDateString = "";
         let monthNum = 6;
@@ -519,6 +518,7 @@
             updatePreview();
         }
 
+        // --- CORE KUITANSI LOGIC ---
         function formatRupiahInput(input) {
             let value = input.value.replace(/[^,\d]/g, '');
             if(value) {
@@ -534,7 +534,7 @@
             return parseInt(val) || 0;
         }
 
-        // Indonesian Terbilang Translator
+        // Robust Indonesian Terbilang
         function terbilang(angka) {
             angka = Math.floor(Math.abs(angka));
             if (angka === 0) return "Nol";
@@ -567,7 +567,6 @@
             return helper(angka).replace(/\s+/g, ' ').trim();
         }
 
-        // --- STREAMING_CHUNK:Memperbarui area pratinjau kuitansi secara real-time... ---
         function updatePreview() {
             const inputNo = document.getElementById('input-no');
             const inputName = document.getElementById('input-name');
@@ -597,7 +596,7 @@
         function handleImageUpload(event, type) {
             const files = event.target.files;
             if (!files || files.length === 0) return;
-            const file = files[0]; // Access first file item safely
+            const file = files[0];
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -623,23 +622,22 @@
             if(type === 'logo') {
                 appState.logoBase64 = '';
                 toggleElementClass('logo-preview-container', 'hidden', true);
-                setElementSrc('setting-logo-preview', '');
-                setElementSrc('preview-header-logo', '');
                 const el = document.getElementById('upload-logo');
                 if (el) el.value = '';
+                setElementSrc('preview-header-logo', '');
             } else {
                 appState.signatureBase64 = '';
                 toggleElementClass('signature-preview-container', 'hidden', true);
                 toggleElementClass('preview-signature', 'hidden', true);
-                setElementSrc('setting-signature-preview', '');
-                setElementSrc('preview-signature', '');
                 const el = document.getElementById('upload-signature');
                 if (el) el.value = '';
+                setElementSrc('preview-signature', '');
             }
             applyLogoSetting();
             updatePreview();
         }
 
+        // Toggle Logo Use
         function toggleLogoUse() {
             const checkbox = document.getElementById('setting-use-logo');
             appState.useLogo = checkbox ? checkbox.checked : false;
@@ -669,11 +667,10 @@
             showToast("Pengaturan disimpan!", "success");
         }
 
-        // --- STREAMING_CHUNK:Menyusun metode cetak PDF temporer berakurasi tinggi untuk Safari iOS... ---
-        // --- EXPORTS & ACTIONS (Optimized A5 Portrait Standard PDF) ---
-        function downloadPDF() {
-            const el = document.getElementById('receipt-canvas');
-            if (!el) return;
+        // --- EXPORTS TO IMAGE (High-Quality 100% Precise Image Generation) ---
+        function downloadImage() {
+            const element = document.getElementById('receipt-canvas');
+            if (!element) return;
             
             const inputNo = document.getElementById('input-no');
             const inputName = document.getElementById('input-name');
@@ -681,45 +678,60 @@
             const clientName = inputName ? inputName.value : 'Klien';
             
             const formattedNomor = `KUI-${noUrut.padStart(3, '0')}_DP_${monthNum}_${yearNum}`;
-            const filename = `Kuitansi_${formattedNomor}_${clientName.replace(/\s+/g, '_')}.pdf`;
+            const filename = `Kuitansi_${formattedNomor}_${clientName.replace(/\s+/g, '_')}.png`;
 
-            showToast("Menyiapkan PDF...");
+            showToast("Mempersiapkan Gambar...", "info");
 
-            // Temporary freeze responsive style & force exact desktop design pixels to prevent any Webkit wrap
-            const originalStyle = el.style.cssText;
-            el.style.width = '520px';
-            el.style.height = '735px';
-            el.style.transform = 'none';
+            // Temporary disable CSS transforms to get clean raw pixels (crucial for iOS Safari)
+            const scaleWrapper = document.getElementById('preview-scale-wrapper');
+            let originalTransform = "";
+            let originalParentHeight = "";
+            if (scaleWrapper) {
+                originalTransform = scaleWrapper.style.transform;
+                originalParentHeight = scaleWrapper.parentElement.style.height;
+                scaleWrapper.style.transform = "none";
+                scaleWrapper.parentElement.style.height = "auto";
+            }
 
-            // High compatibility settings utilizing direct millimetric layout standard
-            const opt = {
-                margin:       0,
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { 
-                    scale: 2.5, 
-                    useCORS: true,
-                    logging: false,
-                    width: 520,
-                    height: 735,
-                    scrollX: 0,
-                    scrollY: 0
-                },
-                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+            // High definition scale (scale: 2 means 1040px width - absolutely gorgeous on mobile screens)
+            const options = {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: 520,
+                height: 735
             };
 
-            html2pdf().set(opt).from(el).save().then(() => {
-                // Restore original style instantly
-                el.style.cssText = originalStyle;
-                showToast("✓ PDF berhasil diunduh!", "success");
-            }).catch((err) => {
-                console.error("PDF generation error: ", err);
-                el.style.cssText = originalStyle;
-                showToast("Gagal mengunduh PDF.", "error");
-            });
+            setTimeout(() => {
+                html2canvas(element, options).then(canvas => {
+                    // Restore CSS scale immediately so UI is undamaged
+                    if (scaleWrapper) {
+                        scaleWrapper.style.transform = originalTransform;
+                        scaleWrapper.parentElement.style.height = originalParentHeight;
+                    }
+
+                    // Convert and trigger download
+                    const imageURI = canvas.toDataURL("image/png");
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = imageURI;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    showToast("✓ Kuitansi disimpan ke galeri!", "success");
+                }).catch(err => {
+                    console.error("Image generation error:", err);
+                    if (scaleWrapper) {
+                        scaleWrapper.style.transform = originalTransform;
+                        scaleWrapper.parentElement.style.height = originalParentHeight;
+                    }
+                    showToast("Gagal menyimpan gambar.", "error");
+                });
+            }, 100);
         }
 
-        // --- STREAMING_CHUNK:Menambahkan fungsi integrasi eksternal (Sheets, WhatsApp, dan Toast)... ---
         function shareWhatsApp() {
             const inputName = document.getElementById('input-name');
             const inputFor = document.getElementById('input-for');
@@ -734,22 +746,23 @@
 
             if (!name) name = "Klien";
             
+            // Prefix "Kak" auto correct formatting
             if(!name.toLowerCase().startsWith('kak ') && !name.toLowerCase().startsWith('kakak ')) {
                 name = `Kak ${name}`;
             }
 
             const text = `Halo *${name}*,
 
-Terima kasih telah mempercayakan rangkaian makeup & kebaya kepada *Dian Pravita MUA* ✨
-Berikut merupakan rangkuman bukti kuitansi pembayaran resmi Anda:
+Terima kasih telah mempercayakan layanan makeup kepada *Dian Pravita MUA* ✨
+Berikut merupakan bukti kuitansi resmi pembayaran Anda:
 
 *No. Kuitansi:* ${fullNo}
 *Untuk Pembayaran:* ${paymentFor}
 *Jumlah:* Rp ${amount}
 
-_(Lembar dokumen fisik/PDF kuitansi resmi dapat diunduh melalui link yang dilampirkan atau diambil secara langsung)_
+_(Lembar bukti fisik/dokumen kuitansi resmi telah kami lampirkan secara terpisah)_
 
-Terima kasih banyak, sampai jumpa di hari istimewamu! 💖
+Terima kasih banyak atas kepercayaan Anda 💖
 - *Dian Pravita MUA*`;
 
             const encodedText = encodeURIComponent(text);
@@ -821,19 +834,16 @@ Terima kasih banyak, sampai jumpa di hari istimewamu! 💖
         function showToast(message, type = "success") {
             const toast = document.getElementById('toast');
             const msgEl = document.getElementById('toast-message');
+            const iconWrap = document.getElementById('toast-icon');
             if (msgEl) msgEl.textContent = message;
             
-            const icon = toast ? toast.querySelector('svg') : null;
-            if (icon) {
+            if (iconWrap) {
                 if(type === 'error') {
-                    icon.className = "w-5 h-5 text-red-400";
-                    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>`;
+                    iconWrap.innerHTML = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
                 } else if(type === 'info') {
-                    icon.className = "w-5 h-5 text-blue-400";
-                    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>`;
+                    iconWrap.innerHTML = `<svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></svg>`;
                 } else {
-                    icon.className = "w-5 h-5 text-gold-500";
-                    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>`;
+                    iconWrap.innerHTML = `<svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
                 }
             }
 
